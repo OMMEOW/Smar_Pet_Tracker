@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await dbConnect();
     let status = await PetStatus.findOne({ petId: "default_pet" });
-    
+
     // If no status exists, create a default one
     if (!status) {
       status = await PetStatus.create({
@@ -36,12 +36,6 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const data = await request.json();
-    
-    const status = await PetStatus.findOneAndUpdate(
-      { petId: "default_pet" },
-      { $set: data },
-      { new: true, upsert: true }
-    );
 
     return NextResponse.json(status);
   } catch (error) {

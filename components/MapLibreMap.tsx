@@ -19,54 +19,100 @@ export default function MapLibreMap({
   const map = useRef<maplibregl.Map | null>(null);
   const dogMarker = useRef<maplibregl.Marker | null>(null);
 
+  // Helper to create GeoJSON circle
+  const createGeoJSONCircle = (center: { lat: number, lng: number }, radiusInMeters: number) => {
+    const points = 64;
+    const coords = [];
+    const km = radiusInMeters / 1000;
+    const distanceX = km / (111.32 * Math.cos(center.lat * Math.PI / 180));
+    const distanceY = km / 110.574;
+
+    for (let i = 0; i < points; i++) {
+      const theta = (i / points) * (2 * Math.PI);
+      const x = distanceX * Math.cos(theta);
+      const y = distanceY * Math.sin(theta);
+      coords.push([center.lng + x, center.lat + y]);
+    }
+    coords.push(coords[0]);
+
+    return {
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: [coords] }
+    };
+  };
+
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Initialize map
+    // Initialize map only once
+    if (map.current) return;
+
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json",
-      center: [center[1], center[0]], // MapLibre uses [lng, lat]
-      zoom: 12,
+      style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+      center: [center[1], center[0]], 
+      zoom: 14, // Slightly closer zoom for pet tracking
     });
 
     map.current.on('load', () => {
-      updateGeofence();
+      // Add source for geofence immediately on load
+      if (geofence) {
+        const sourceData = createGeoJSONCircle({ lat: geofence.lat, lng: geofence.lng }, geofence.radius);
+        map.current?.addSource('geofence-source', { type: 'geojson', data: sourceData as any });
+        
+        map.current?.addLayer({
+          id: 'geofence-fill',
+          type: 'fill',
+          source: 'geofence-source',
+          paint: { 
+            'fill-color': '#28cd41', 
+            'fill-opacity': 0.15 
+          }
+        });
+
+        map.current?.addLayer({
+          id: 'geofence-line',
+          type: 'line',
+          source: 'geofence-source',
+          paint: { 
+            'line-color': '#006e1a', 
+            'line-width': 2.5,
+            'line-dasharray': [1.5, 1.5]
+          }
+        });
+      }
     });
 
     return () => {
       map.current?.remove();
       map.current = null;
+      dogMarker.current = null;
     };
   }, []);
 
-  // Update center
+  // Update map view with easeTo for smoothness
   useEffect(() => {
     if (map.current) {
-      map.current.flyTo({
+      map.current.easeTo({
         center: [center[1], center[0]],
-        speed: 0.8
+        duration: 1000,
+        essential: true
       });
     }
   }, [center[0], center[1]]);
 
-  // Update dog marker
+  // Update dog marker position and style
   useEffect(() => {
     if (!map.current) return;
 
     if (markerPosition) {
       if (!dogMarker.current) {
-        // Create custom element for dog marker
         const el = document.createElement('div');
-        el.className = 'dog-marker-container';
+        el.className = 'marker';
         el.innerHTML = `
-          <div class="relative group">
-            <div class="w-12 h-12 bg-white dark:bg-[#2e3034] rounded-full shadow-2xl flex items-center justify-center p-1 border-2 border-[#006e1a] animate-pulse">
-              <div class="w-full h-full rounded-full overflow-hidden">
-                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0JkAhNjWRcWR7pkHly0EkTWpfcUfWqJYPKXtLufaBXrObP6sPOOfalir6ye5SyE_tbZKBpuYxIEt51bJzM0StdcQ6iFr5TI8s0KhgmIQDdKGSPQJ6khZTn95VXBPiB8GPSke50dNQmWXHEEr9H79jwRobrGF8ndrHGAHuNoHxp_NWMqFIBIJl0dcJtXh5x159r1DCVlE2D73W8mgoGtYfm6TG9RitlhamO-MiWzHOao6mLJ-0XCFGpMT7SKXn4PPsGpkm6M7ghWA" class="w-full h-full object-cover" />
-              </div>
-            </div>
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-[#006e1a] border-2 border-white rounded-full shadow-lg"></div>
+          <div class="pulse-ring"></div>
+          <div class="marker-core">
+            <img src="/dog.png" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuB0JkAhNjWRcWR7pkHly0EkTWpfcUfWqJYPKXtLufaBXrObP6sPOOfalir6ye5SyE_tbZKBpuYxIEt51bJzM0StdcQ6iFr5TI8s0KhgmIQDdKGSPQJ6khZTn95VXBPiB8GPSke50dNQmWXHEEr9H79jwRobrGF8ndrHGAHuNoHxp_NWMqFIBIJl0dcJtXh5x159r1DCVlE2D73W8mgoGtYfm6TG9RitlhamO-MiWzHOao6mLJ-0XCFGpMT7SKXn4PPsGpkm6M7ghWA'" />
           </div>
         `;
 
@@ -76,76 +122,86 @@ export default function MapLibreMap({
       } else {
         dogMarker.current.setLngLat([markerPosition[1], markerPosition[0]]);
       }
-    } else if (dogMarker.current) {
-      dogMarker.current.remove();
-      dogMarker.current = null;
     }
   }, [markerPosition]);
 
-  // Update geofence
-  const updateGeofence = () => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
-
-    const sourceId = 'geofence-source';
-    const fillLayerId = 'geofence-fill';
-    const lineLayerId = 'geofence-line';
-
-    if (!geofence) {
-      if (map.current.getLayer(fillLayerId)) map.current.removeLayer(fillLayerId);
-      if (map.current.getLayer(lineLayerId)) map.current.removeLayer(lineLayerId);
-      if (map.current.getSource(sourceId)) map.current.removeSource(sourceId);
-      return;
-    }
-
-    // Create a GeoJSON for the geofence circle
-    const points = 64;
-    const coords = [];
-    const km = geofence.radius / 1000;
-    const distanceX = km / (111.32 * Math.cos(geofence.lat * Math.PI / 180));
-    const distanceY = km / 110.574;
-
-    for (let i = 0; i < points; i++) {
-        const theta = (i / points) * (2 * Math.PI);
-        const x = distanceX * Math.cos(theta);
-        const y = distanceY * Math.sin(theta);
-        coords.push([geofence.lng + x, geofence.lat + y]);
-    }
-    coords.push(coords[0]);
-
-    const geojsonData: any = {
-      type: "Feature",
-      geometry: { type: "Polygon", coordinates: [coords] }
-    };
-
-    if (map.current.getSource(sourceId)) {
-      (map.current.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojsonData);
-    } else {
-      map.current.addSource(sourceId, { type: 'geojson', data: geojsonData });
-      map.current.addLayer({
-        id: fillLayerId,
-        type: 'fill',
-        source: sourceId,
-        paint: { 'fill-color': '#28cd41', 'fill-opacity': 0.1 }
-      });
-      map.current.addLayer({
-        id: lineLayerId,
-        type: 'line',
-        source: sourceId,
-        paint: { 'line-color': '#006e1a', 'line-width': 2, 'line-dasharray': [2, 2] }
-      });
-    }
-  };
-
+  // Update geofence dynamic data (radius slider change)
   useEffect(() => {
-    updateGeofence();
-  }, [geofence]);
+    if (!map.current || !geofence || !map.current.getStyle()) return;
+
+    const source = map.current.getSource('geofence-source') as maplibregl.GeoJSONSource;
+    if (source) {
+      source.setData(createGeoJSONCircle({ lat: geofence.lat, lng: geofence.lng }, geofence.radius) as any);
+    }
+  }, [geofence?.radius, geofence?.lat, geofence?.lng]);
 
   return (
-    <div className="w-full h-full relative overflow-hidden rounded-3xl group">
+    <div className="w-full h-full relative overflow-hidden rounded-3xl shadow-inner bg-[#1a1c1f]">
       <div ref={mapContainer} className="w-full h-full" />
       <style jsx global>{`
-        .maplibregl-ctrl-attrib { display: none; }
-        .dog-marker-container { cursor: pointer; }
+        .maplibregl-ctrl-attrib, .maplibregl-ctrl-logo { display: none; }
+        
+        .marker {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+
+        .marker-core {
+          position: relative;
+          width: 44px;
+          height: 44px;
+          background: white;
+          border-radius: 50%;
+          border: 2.5px solid #22c55e;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          z-index: 2;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .marker-core:hover {
+          transform: scale(1.15);
+        }
+
+        .marker-core img {
+          width: 90%;
+          height: 90%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+
+        .pulse-ring {
+          content: "";
+          position: absolute;
+          width: 60px;
+          height: 60px;
+          background: rgba(34, 197, 94, 0.5);
+          border-radius: 50%;
+          animation: apple-pulse 2s infinite;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        @keyframes apple-pulse {
+          0% {
+            transform: scale(0.6);
+            opacity: 0.8;
+          }
+          70% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1.8);
+            opacity: 0;
+          }
+        }
       `}</style>
     </div>
   );
