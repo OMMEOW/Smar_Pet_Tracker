@@ -1,283 +1,127 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ref, onValue, set } from "@/lib/firebase";
-import { database } from "@/lib/firebase";
-import { DashboardCard } from "@/components/DashboardCard";
-import { Button } from "@/components/Button";
-import MapWrapper from "@/components/MapWrapper";
-import {
-  Settings as SettingsIcon,
-  Shield,
-  Bell,
-  MapPin,
-} from "lucide-react";
-import { LatLngExpression } from "leaflet";
-
-interface Geofence {
-  lat: number;
-  lng: number;
-  radius: number;
-}
+import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
+import { MobileNav } from "@/components/MobileNav";
 
 export default function SettingsPage() {
-  const [geofence, setGeofence] = useState<Geofence>({
-    lat: 19.123456,
-    lng: 72.987654,
-    radius: 100,
-  });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [saving, setSaving] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
+  const [geofence, setGeofence] = useState({ lat: 19.123456, lng: 72.987654, radius: 100 });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const geofenceRef = ref(database, "pet/geofence");
-    const unsubscribe = onValue(geofenceRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setGeofence(data);
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch("/api/pet");
+        const data = await res.json();
+        if (data && data.geofence) setGeofence(data.geofence);
+        setLoading(false);
+      } catch (err) {
+        console.error("fetch error:", err);
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    };
+    fetchStatus();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  const handleUpdate = async () => {
     setSaving(true);
-
-    // Validation
-    if (
-      isNaN(geofence.lat) ||
-      isNaN(geofence.lng) ||
-      isNaN(geofence.radius)
-    ) {
-      setError("All fields must be valid numbers");
-      setSaving(false);
-      return;
-    }
-
-    if (geofence.lat < -90 || geofence.lat > 90) {
-      setError("Latitude must be between -90 and 90");
-      setSaving(false);
-      return;
-    }
-
-    if (geofence.lng < -180 || geofence.lng > 180) {
-      setError("Longitude must be between -180 and 180");
-      setSaving(false);
-      return;
-    }
-
-    if (geofence.radius <= 0) {
-      setError("Radius must be greater than 0");
-      setSaving(false);
-      return;
-    }
-
     try {
-      const geofenceRef = ref(database, "pet/geofence");
-      await set(geofenceRef, geofence);
-      setSuccess("Geofence settings saved successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError("Failed to save geofence settings");
-      console.error(err);
+      await fetch("/api/pet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ geofence }),
+      });
     } finally {
       setSaving(false);
     }
   };
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete the geofence?")) {
-      return;
-    }
-
-    setError("");
-    setSuccess("");
-    setSaving(true);
-
-    try {
-      const geofenceRef = ref(database, "pet/geofence");
-      await set(geofenceRef, null);
-      setSuccess("Geofence deleted successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError("Failed to delete geofence");
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const mapCenter: LatLngExpression = [geofence.lat, geofence.lng];
 
   return (
-    <div className="h-[calc(100vh-80px)] overflow-auto bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 px-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <SettingsIcon className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-slate-900 dark:text-white text-2xl font-semibold">
-              Settings
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-gray-400">
-              Manage your pet tracking preferences
-            </p>
-          </div>
-        </div>
+    <div className="flex flex-col h-screen overflow-hidden bg-surface">
+      <Navbar />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 md:ml-64 p-8 overflow-y-auto custom-scrollbar">
+          <div className="max-w-2xl">
+            <header className="mb-10">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">Configuration</p>
+              <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">System Settings</h1>
+            </header>
 
-        <div className="space-y-6">
-          {/* Geofence Settings */}
-          <DashboardCard>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-slate-900 dark:text-white font-semibold">
-                Geofence Settings
-              </h2>
+            <div className="space-y-8">
+              <section className="bg-surface-container-low dark:bg-[#1a1c1f]/50 p-8 rounded-[2rem] border border-outline-variant/10">
+                <div className="flex items-center gap-3 mb-8">
+                  <span className="material-symbols-outlined text-primary">security</span>
+                  <h2 className="font-headline font-bold text-xl text-on-surface">Geofence Parameters</h2>
+                </div>
+
+                <div className="space-y-6">
+                   <div className="grid grid-cols-2 gap-6">
+                      <div className="relative group">
+                        <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Latitude</label>
+                        <input 
+                          className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface" 
+                          type="number" 
+                          step="any"
+                          value={geofence.lat}
+                          onChange={(e) => setGeofence({ ...geofence, lat: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
+                      <div className="relative group">
+                        <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Longitude</label>
+                        <input 
+                          className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface" 
+                          type="number" 
+                          step="any"
+                          value={geofence.lng}
+                          onChange={(e) => setGeofence({ ...geofence, lng: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
+                   </div>
+
+                   <div className="relative group">
+                      <div className="flex justify-between items-center mb-4">
+                        <label className="text-[10px] font-bold uppercase text-secondary ml-1 tracking-widest">Safe Zone Radius</label>
+                        <span className="bg-primary/10 text-primary text-xs font-black px-3 py-1 rounded-full">{geofence.radius}m</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="50" 
+                        max="1000" 
+                        step="10"
+                        value={geofence.radius}
+                        onChange={(e) => setGeofence({ ...geofence, radius: parseInt(e.target.value) })}
+                        className="w-full h-1.5 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary" 
+                      />
+                      <div className="flex justify-between mt-2 px-1">
+                        <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">50m</span>
+                        <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">1km</span>
+                      </div>
+                   </div>
+
+                   <button 
+                    onClick={handleUpdate}
+                    disabled={saving}
+                    className="w-full mt-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-5 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {saving ? "Saving Changes..." : "Apply Configuration"}
+                  </button>
+                </div>
+              </section>
+
+              <section className="bg-surface-container-low dark:bg-[#1a1c1f]/50 p-8 rounded-[2rem] border border-outline-variant/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="material-symbols-outlined text-secondary">notifications</span>
+                  <h2 className="font-headline font-bold text-xl text-on-surface">Notifications</h2>
+                </div>
+                <p className="text-secondary text-sm font-medium">Alerts will be sent to your connected mobile device (GK-8821).</p>
+              </section>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-700 dark:text-gray-300 mb-2 font-medium">
-                    Latitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={geofence.lat}
-                    onChange={(e) =>
-                      setGeofence({
-                        ...geofence,
-                        lat: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                    required
-                    min="-90"
-                    max="90"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-slate-700 dark:text-gray-300 mb-2 font-medium">
-                    Longitude
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={geofence.lng}
-                    onChange={(e) =>
-                      setGeofence({
-                        ...geofence,
-                        lng: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-gray-700 border border-slate-200 dark:border-gray-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                    required
-                    min="-180"
-                    max="180"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm text-slate-700 dark:text-gray-300 font-medium">
-                    Safe Zone Radius
-                  </label>
-                  <span className="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg font-medium">
-                    {geofence.radius}m
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="100"
-                  max="2000"
-                  step="50"
-                  value={geofence.radius}
-                  onChange={(e) =>
-                    setGeofence({
-                      ...geofence,
-                      radius: Number(e.target.value),
-                    })
-                  }
-                  className="w-full h-2 bg-slate-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                />
-                <div className="flex justify-between mt-2">
-                  <span className="text-xs text-slate-500 dark:text-gray-400">
-                    100m
-                  </span>
-                  <span className="text-xs text-slate-500 dark:text-gray-400">
-                    2000m
-                  </span>
-                </div>
-              </div>
-
-              {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="p-3 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 rounded-lg text-sm">
-                  {success}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-gray-700">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleDelete}
-                  disabled={saving || loading}
-                >
-                  Delete
-                </Button>
-                <Button type="submit" disabled={saving || loading}>
-                  {saving ? "Saving..." : "Save Geofence"}
-                </Button>
-              </div>
-            </form>
-          </DashboardCard>
-
-          {/* Preview */}
-          <DashboardCard>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-slate-900 dark:text-white font-semibold">
-                Preview
-              </h2>
-            </div>
-            {loading ? (
-              <div className="h-[400px] flex items-center justify-center">
-                <div className="text-gray-500 dark:text-gray-400">
-                  Loading map...
-                </div>
-              </div>
-            ) : (
-              <MapWrapper
-                center={mapCenter}
-                zoom={15}
-                geofence={geofence}
-                height="400px"
-              />
-            )}
-          </DashboardCard>
-        </div>
+          </div>
+        </main>
       </div>
+      <MobileNav />
     </div>
   );
 }

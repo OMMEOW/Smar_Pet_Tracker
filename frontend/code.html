@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guardian Kinetic | IoT Dog Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#626267",
+                        "surface-container-low": "#f3f3f8",
+                        "tertiary-fixed": "#ffdad5",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "on-primary-fixed": "#002203",
+                        "surface": "#f9f9fe",
+                        "primary-fixed-dim": "#46e354",
+                        "surface-dim": "#d9dade",
+                        "inverse-primary": "#46e354",
+                        "surface-container": "#ededf2",
+                        "on-error": "#ffffff",
+                        "primary": "#006e1a",
+                        "on-primary-fixed-variant": "#005311",
+                        "secondary": "#5d5e63",
+                        "tertiary-container": "#ff9587",
+                        "outline-variant": "#bccbb5",
+                        "on-background": "#1a1c1f",
+                        "tertiary": "#c0000a",
+                        "primary-fixed": "#71ff74",
+                        "secondary-container": "#e0dfe4",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "on-tertiary-container": "#8f0005",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e2e2e7",
+                        "surface-container-high": "#e8e8ed",
+                        "inverse-on-surface": "#f0f0f5",
+                        "on-secondary-fixed-variant": "#46464b",
+                        "surface-tint": "#006e1a",
+                        "secondary-fixed": "#e3e2e7",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e2e2e7",
+                        "surface-bright": "#f9f9fe",
+                        "on-surface-variant": "#3d4a3a",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#c6c6cb",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#410001",
+                        "outline": "#6d7b68",
+                        "primary-container": "#28cd41",
+                        "background": "#f9f9fe",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#005010",
+                        "inverse-surface": "#2e3034",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .safe-zone-radar {
+            background: radial-gradient(circle, rgba(40, 205, 65, 0.1) 0%, rgba(40, 205, 65, 0) 70%);
+            border: 2px solid rgba(0, 110, 26, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/20 overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-[#f9f9fe]/80 dark:bg-[#1a1c1f]/80 backdrop-blur-xl font-['Manrope'] font-semibold tracking-tight text-sm docked full-width top-0 sticky z-50 no-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex justify-between items-center w-full px-6 py-4 mx-auto">
+<div class="flex items-center gap-4">
+<span class="font-['Manrope'] font-extrabold text-xl tracking-tighter text-slate-900 dark:text-slate-50">Guardian Kinetic</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-[#006e1a] dark:text-[#28cd41] font-bold" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors px-2 py-1 rounded-lg" href="#">Analytics</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors px-2 py-1 rounded-lg" href="#">Devices</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden ml-2">
+<img alt="User profile" data-alt="professional male user profile picture with neutral background and soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOKIE9biwmszQZWFqW-3mqjmJA0rjRKJDtWfcj0QpHFnVYwOJJE7AOav2rESgPe4yk9jxbEpQVHBSORNBAkufMKO4bvIKyeKhWFM71guM9jZaVrDn9j-9NFwBc9Y7SAtaa0Htx83BiZCkFUUGnZ4d1-CWvSfy-49nLTQkm-hFXj8czc09wmZY-Oq3pKILs5Ud3eDJztb9WMpZKtiAg93ztkeDoy_ZQUOSSE5Aaj-3P-5g9za4KckDZ3Lb1vQjlPjPIQin1OV_TC1o"/>
+</div>
+</div>
+</header>
+<div class="flex h-[calc(100vh-72px)] overflow-hidden">
+<!-- SideNavBar (Desktop Only) -->
+<aside class="hidden md:flex flex-col fixed left-0 top-[72px] h-full p-6 gap-8 bg-[#f3f3f8] dark:bg-[#2e3034] w-64 border-r-0 tonal-shift shadow-none font-['Inter'] font-medium text-xs uppercase tracking-widest">
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 bg-white dark:bg-[#1a1c1f] text-[#006e1a] dark:text-[#28cd41] rounded-xl px-4 py-3 shadow-sm hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>Live Map</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>Activity</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">radar</span>
+<span>Safe Zones</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">pets</span>
+<span>Health</span>
+</a>
+</div>
+<div class="mt-auto pb-24">
+<div class="bg-surface-container-lowest dark:bg-inverse-surface p-4 rounded-2xl shadow-sm">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">potted_plant</span>
+</div>
+<div>
+<p class="text-[10px] text-on-secondary-container">BATTERY</p>
+<p class="text-sm font-bold normal-case text-on-surface">84% Charged</p>
+</div>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary w-[84%] h-full"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 relative">
+<!-- Full Screen Map Canvas -->
+<div class="absolute inset-0 z-0 bg-surface-container-low">
+<div class="w-full h-full grayscale-[0.2] opacity-90 relative overflow-hidden" data-alt="detailed satellite map view of a suburban neighborhood with lush backyards and clear street lines in soft daylight" data-location="Seattle, Washington" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA8xNgbPVwMz4FjdAvAD6f-4zgtYjGx7a79I4OVBpOQngw1SD7hzfZhLlHpd4frduy0l0A0lJ4CB_4JgRm0BgLICevbVi7dEgACMqp0QwYpvZ56Pg6HRpp6NYQSwtedly0azzVoAAVNMk8tgx8qqsxQQbyi4FAfkJ4KL8NbPV9n0E77YaMQy7MlLs0XYvGIU8leqQe920saYkhZfhBMbNHfS0XhDY-LKzHgpZp-ffFQumpJQy3oQs5gihy80nPaKb49MAw8-QCHamg'); background-size: cover; background-position: center;">
+<!-- Geofence Overlay -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full safe-zone-radar flex items-center justify-center">
+<!-- Dog Marker -->
+<div class="relative">
+<div class="w-12 h-12 bg-white dark:bg-inverse-surface rounded-full shadow-lg flex items-center justify-center p-1.5 border-2 border-primary animate-pulse">
+<div class="w-full h-full rounded-full overflow-hidden">
+<img alt="Kinetic Dog Icon" data-alt="close up headshot of a friendly golden retriever dog looking at camera with bright eyes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0JkAhNjWRcWR7pkHly0EkTWpfcUfWqJYPKXtLufaBXrObP6sPOOfalir6ye5SyE_tbZKBpuYxIEt51bJzM0StdcQ6iFr5TI8s0KhgmIQDdKGSPQJ6khZTn95VXBPiB8GPSke50dNQmWXHEEr9H79jwRobrGF8ndrHGAHuNoHxp_NWMqFIBIJl0dcJtXh5x159r1DCVlE2D73W8mgoGtYfm6TG9RitlhamO-MiWzHOao6mLJ-0XCFGpMT7SKXn4PPsGpkm6M7ghWA"/>
+</div>
+</div>
+<div class="absolute -top-1 -right-1 w-4 h-4 bg-primary border-2 border-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Status Card (Top Right) -->
+<div class="absolute top-6 right-6 z-10 w-80">
+<div class="bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-2xl rounded-3xl p-5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-outline-variant/10">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(0,110,26,0.5)]"></span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Inside Geofence</span>
+</div>
+<span class="text-[10px] font-medium text-secondary opacity-60">ID: GK-8821</span>
+</div>
+<h2 class="font-headline text-3xl font-extrabold tracking-tight mb-4">Apollo</h2>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl">
+<p class="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Latitude</p>
+<p class="font-headline font-semibold text-sm">47.6062° N</p>
+</div>
+<div class="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl">
+<p class="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Longitude</p>
+<p class="font-headline font-semibold text-sm">122.3321° W</p>
+</div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-secondary">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>Last update: 2m ago</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">signal_cellular_alt</span>
+<span>Signal: Strong</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Panel (Geofence Controls & Alerts) -->
+<div class="absolute left-6 top-6 bottom-6 z-10 w-72 flex flex-col gap-4 pointer-events-none">
+<!-- Controls Card -->
+<div class="bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-3xl p-6 shadow-xl border border-outline-variant/10 pointer-events-auto">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">potted_plant</span>
+<h3 class="font-headline font-bold text-lg">Safe Zone</h3>
+</div>
+<div class="space-y-5">
+<div class="relative group">
+<label class="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Center Latitude</label>
+<input class="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all" type="text" value="47.6062"/>
+</div>
+<div class="relative group">
+<label class="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Center Longitude</label>
+<input class="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all" type="text" value="-122.3321"/>
+</div>
+<div class="relative group">
+<label class="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Radius (Meters)</label>
+<input class="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all" type="number" value="200"/>
+</div>
+<button class="w-full mt-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95">
+                            Update Geofence
+                        </button>
+</div>
+</div>
+<!-- Alerts Section -->
+<div class="flex-1 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-3xl p-6 shadow-xl border border-outline-variant/10 pointer-events-auto overflow-hidden flex flex-col">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-lg">Recent Alerts</h3>
+<span class="bg-tertiary/10 text-tertiary text-[10px] font-black px-2 py-1 rounded-lg">LIVE</span>
+</div>
+<div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+<div class="flex gap-4 items-start">
+<div class="mt-1 w-2 h-2 rounded-full bg-tertiary ring-4 ring-tertiary/10 shrink-0"></div>
+<div>
+<p class="text-xs font-bold text-on-surface">Dog left geofence</p>
+<p class="text-[10px] text-secondary mt-0.5">North Sector • 09:42 AM</p>
+</div>
+</div>
+<div class="flex gap-4 items-start opacity-60">
+<div class="mt-1 w-2 h-2 rounded-full bg-primary shrink-0"></div>
+<div>
+<p class="text-xs font-bold text-on-surface">Safe zone entered</p>
+<p class="text-[10px] text-secondary mt-0.5">East Gate • 09:15 AM</p>
+</div>
+</div>
+<div class="flex gap-4 items-start opacity-60">
+<div class="mt-1 w-2 h-2 rounded-full bg-secondary shrink-0"></div>
+<div>
+<p class="text-xs font-bold text-on-surface">Low battery warning</p>
+<p class="text-[10px] text-secondary mt-0.5">Apollo Device • 08:30 AM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-3 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[2rem] no-border">
+<a class="flex flex-col items-center justify-center bg-[#28cd41]/10 text-[#006e1a] dark:text-[#28cd41] rounded-2xl px-5 py-2 scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-['Inter'] font-bold text-[10px] tracking-wide mt-1">Live</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Inter'] font-bold text-[10px] tracking-wide mt-1">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-['Inter'] font-bold text-[10px] tracking-wide mt-1">Zones</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined">health_and_safety</span>
+<span class="font-['Inter'] font-bold text-[10px] tracking-wide mt-1">Care</span>
+</a>
+</nav>
+</body></html>

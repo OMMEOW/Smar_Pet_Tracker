@@ -1,47 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body selection:bg-primary/20 overflow-hidden;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    @apply inline-block;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .safe-zone-radar {
+    background: radial-gradient(circle, rgba(40, 205, 65, 0.1) 0%, rgba(40, 205, 65, 0) 70%);
+    border: 2px solid rgba(0, 110, 26, 0.2);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-surface-container-highest rounded-full;
   }
 }
-
-/* Leaflet CSS */
-@import "leaflet/dist/leaflet.css";
-
-/* Animation utilities */
-@keyframes slide-in-from-top-5 {
-  from {
-    transform: translateY(-1.25rem);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-in {
-  animation: slide-in-from-top-5 0.3s ease-out;
-}
-
