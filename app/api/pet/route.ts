@@ -37,6 +37,12 @@ export async function POST(request: Request) {
     await dbConnect();
     const data = await request.json();
 
+    const status = await PetStatus.findOneAndUpdate(
+      { petId: "default_pet" },
+      { $set: data },
+      { new: true, upsert: true }
+    );
+
     return NextResponse.json(status);
   } catch (error) {
     console.error("API Error:", error);

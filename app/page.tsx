@@ -20,17 +20,17 @@ interface Location {
   timestamp: number;
 }
 
-interface Geofence {
-  lat: number;
-  lng: number;
-  radius: number;
-}
+export type Geofence = 
+  | { type: "circle"; lat: number; lng: number; radius: number }
+  | { type: "lasso"; coordinates: [number, number][] };
 
 export default function Dashboard() {
   const [location, setLocation] = useState<Location | null>(null);
   const [alert, setAlert] = useState(false);
   const [geofence, setGeofence] = useState<Geofence | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [mode, setMode] = useState<"circle" | "lasso">("circle");
+  const [activeLassoPoints, setActiveLassoPoints] = useState<[number, number][]>([]);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -95,6 +95,13 @@ export default function Dashboard() {
                 center={location ? [location.latitude, location.longitude] : [19.076, 72.8777]}
                 markerPosition={location ? [location.latitude, location.longitude] : null}
                 geofence={geofence}
+                mode={mode}
+                activeLassoPoints={activeLassoPoints}
+                onLassoPointsChange={setActiveLassoPoints}
+                onLassoFinish={(coords) => {
+                  setGeofence({ type: "lasso", coordinates: coords });
+                  setActiveLassoPoints([]);
+                }}
              />
           </div>
 
@@ -105,7 +112,17 @@ export default function Dashboard() {
 
           {/* Side Panel (Geofence Controls & Alerts) */}
           <div className="absolute left-6 top-6 bottom-6 z-10 w-72 hidden lg:flex flex-col gap-4 pointer-events-none">
-            <GeofenceControls initialGeofence={geofence} onUpdate={handleUpdateGeofence} />
+            <GeofenceControls 
+              mode={mode}
+              onModeChange={(newMode) => {
+                setMode(newMode);
+                setActiveLassoPoints([]);
+              }}
+              initialGeofence={geofence} 
+              onUpdate={handleUpdateGeofence}
+              activeLassoPoints={activeLassoPoints}
+              onLassoPointsChange={setActiveLassoPoints}
+            />
             <AlertsSection alerts={formattedAlerts} />
           </div>
         </main>
