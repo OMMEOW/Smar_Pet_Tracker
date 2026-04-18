@@ -5,12 +5,25 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 export default function SettingsPage() {
+  const { status: authStatus } = useSession();
+  const router = useRouter();
   const [geofence, setGeofence] = useState({ lat: 19.123456, lng: 72.987654, radius: 100 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (authStatus === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [authStatus, router]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+
     const fetchStatus = async () => {
       try {
         const res = await fetch("/api/pet");
@@ -22,7 +35,15 @@ export default function SettingsPage() {
       }
     };
     fetchStatus();
-  }, []);
+  }, [authStatus]);
+
+  if (authStatus === "loading") {
+    return <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center text-white font-headline">Authenticating...</div>;
+  }
+
+  if (authStatus === "unauthenticated") {
+    return null;
+  }
 
   const handleUpdate = async () => {
     setSaving(true);

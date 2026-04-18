@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guardian Kinetic | Secure Sign Up</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#f9f9fe",
+                        "primary-fixed-dim": "#46e354",
+                        "primary-fixed": "#71ff74",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d9dade",
+                        "primary-container": "#28cd41",
+                        "surface-container-highest": "#e2e2e7",
+                        "on-tertiary-fixed": "#410001",
+                        "on-surface-variant": "#3d4a3a",
+                        "inverse-surface": "#2e3034",
+                        "on-secondary-container": "#626267",
+                        "secondary-container": "#e0dfe4",
+                        "on-secondary-fixed-variant": "#46464b",
+                        "on-background": "#1a1c1f",
+                        "secondary": "#5d5e63",
+                        "outline": "#6d7b68",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "surface-variant": "#e2e2e7",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#005010",
+                        "on-primary-fixed-variant": "#005311",
+                        "inverse-primary": "#46e354",
+                        "secondary-fixed": "#e3e2e7",
+                        "on-tertiary-container": "#8f0005",
+                        "surface-container-low": "#f3f3f8",
+                        "surface-container-high": "#e8e8ed",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#c0000a",
+                        "secondary-fixed-dim": "#c6c6cb",
+                        "primary": "#006e1a",
+                        "tertiary-container": "#ff9587",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#bccbb5",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "tertiary-fixed": "#ffdad5",
+                        "on-surface": "#1a1c1f",
+                        "inverse-on-surface": "#f0f0f5",
+                        "surface-tint": "#006e1a",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#002203",
+                        "background": "#f9f9fe",
+                        "surface-bright": "#f9f9fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ededf2"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #006e1a 0%, #28cd41 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0 24px 48px -12px rgba(26, 28, 31, 0.06);
+        }
+        .input-minimal {
+            border: none;
+            border-bottom: 2px solid #e2e2e7;
+            background: transparent;
+            padding-left: 0;
+            padding-right: 0;
+            transition: border-color 0.3s ease;
+        }
+        .input-minimal:focus {
+            outline: none;
+            box-shadow: none;
+            border-bottom-color: #006e1a;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen flex items-center justify-center p-6">
+<!-- Transactional Layout: Navigation Suppressed for Focus -->
+<main class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl overflow-hidden ambient-shadow">
+<!-- Brand/Visual Side -->
+<section class="hidden md:block relative bg-surface-container-high overflow-hidden">
+<img alt="Guardian Kinetic Protection" class="absolute inset-0 w-full h-full object-cover" data-alt="Close-up of a sleek golden retriever wearing a high-tech tracking collar in a soft sunlit meadow at dawn" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-vDCmjtwFAfyhX23pjcfeypPNiv3VeP0mH-iGPX7WJt5tbmUSaBs5EgFXWvMZxfrklK7stpSCisR8KAyU1DDSWTIJuHJDSQ7ygc4NMWmzJHpL053s7i_key0vpFltyOK6MvF4gVWtrKz1YNVljPMW3k4fbJTjsuZBm-E4Ep5ZH4hglsujhqjDi8ju1_aH-GsK27895i8jtFvuZ5a5Obm5z921lLuAryiJkEBhyCnl467TGQ5zDnsh04HdE2mn6eeweDmfyewFCM8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/60 to-transparent"></div>
+<div class="absolute bottom-12 left-12 right-12 text-surface-container-lowest">
+<p class="font-headline font-bold text-3xl tracking-tight leading-tight">
+                    Guardian Kinetic
+                </p>
+<p class="font-body text-surface-variant mt-2 opacity-90 max-w-xs">
+                    Advanced biometric tracking and precision safe-zones for your most loyal companion.
+                </p>
+</div>
+</section>
+<!-- Form Side -->
+<section class="p-8 md:p-16 flex flex-col justify-center bg-surface-container-lowest">
+<!-- Header -->
+<header class="mb-10">
+<div class="flex items-center gap-2 mb-8 md:hidden">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-headline font-extrabold text-xl tracking-tighter text-on-surface">Guardian Kinetic</span>
+</div>
+<h1 class="font-headline font-extrabold text-4xl text-on-surface tracking-tighter mb-2">Create Account</h1>
+<p class="font-label text-secondary tracking-wide uppercase text-[10px] font-semibold opacity-70">Securing your journey together</p>
+</header>
+<!-- Signup Form -->
+<form action="#" class="space-y-8" method="POST">
+<!-- Name Field -->
+<div class="relative group">
+<label class="block font-label text-xs font-semibold text-secondary mb-1" for="name">FULL NAME</label>
+<input class="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent" id="name" name="name" placeholder="Enter your name" required="" type="text"/>
+</div>
+<!-- Email Field -->
+<div class="relative group">
+<label class="block font-label text-xs font-semibold text-secondary mb-1" for="email">EMAIL ADDRESS</label>
+<input class="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent" id="email" name="email" placeholder="name@example.com" required="" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="relative group">
+<label class="block font-label text-xs font-semibold text-secondary mb-1" for="password">PASSWORD</label>
+<div class="relative">
+<input class="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent pr-10" id="password" name="password" placeholder="Create a secure password" required="" type="password"/>
+<span class="material-symbols-outlined absolute right-0 bottom-2 text-outline-variant cursor-pointer hover:text-primary transition-colors">visibility</span>
+</div>
+</div>
+<!-- Terms -->
+<div class="flex items-start gap-3 py-2">
+<div class="pt-0.5">
+<input class="rounded-sm border-outline-variant text-primary focus:ring-primary-container h-4 w-4" id="terms" name="terms" required="" type="checkbox"/>
+</div>
+<label class="text-xs text-secondary leading-relaxed" for="terms">
+                        I agree to the <a class="text-primary font-semibold hover:underline" href="#">Safety Standards</a> and <a class="text-primary font-semibold hover:underline" href="#">Privacy Policy</a>.
+                    </label>
+</div>
+<!-- Action Button -->
+<button class="primary-gradient w-full py-4 rounded-full text-on-primary font-headline font-bold tracking-tight text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300" type="submit">
+                    Get Started
+                </button>
+</form>
+<!-- Footer / Redirect -->
+<footer class="mt-10 pt-8 border-t border-surface-container-high">
+<p class="text-sm text-center font-body text-secondary">
+                    Already a guardian? 
+                    <a class="text-primary font-bold hover:underline transition-all" href="#">Log In</a>
+</p>
+</footer>
+</section>
+</main>
+<!-- Background Decoration (Breathing Precision) -->
+<div class="fixed top-0 right-0 w-1/3 h-1/3 bg-primary-container/5 blur-[120px] -z-10 rounded-full"></div>
+<div class="fixed bottom-0 left-0 w-1/4 h-1/4 bg-primary-fixed/5 blur-[100px] -z-10 rounded-full"></div>
+</body></html>

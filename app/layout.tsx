@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "High-end dog tracking system with breathing precision.",
 };
 
+import AuthProvider from "@/components/AuthProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -14,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

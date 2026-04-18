@@ -11,11 +11,24 @@ interface HistoryEntry {
   timestamp: number;
 }
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 export default function HistoryPage() {
+  const { status: authStatus } = useSession();
+  const router = useRouter();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authStatus === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [authStatus, router]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+
     const fetchHistory = async () => {
       try {
         const res = await fetch("/api/pet/history");
@@ -27,7 +40,15 @@ export default function HistoryPage() {
       }
     };
     fetchHistory();
-  }, []);
+  }, [authStatus]);
+
+  if (authStatus === "loading") {
+    return <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center text-white font-headline">Authenticating...</div>;
+  }
+
+  if (authStatus === "unauthenticated") {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-surface">

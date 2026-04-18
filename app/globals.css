@@ -7,7 +7,7 @@
 
 @layer base {
   body {
-    @apply bg-surface text-on-surface font-body selection:bg-primary/20 overflow-hidden;
+    @apply bg-surface text-on-surface font-body selection:bg-primary/20 overflow-x-hidden;
   }
 }
 
@@ -15,6 +15,40 @@
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     @apply inline-block;
+  }
+
+  .primary-gradient {
+    background: linear-gradient(135deg, #006e1a 0%, #28cd41 100%);
+  }
+
+  .glass-panel {
+    background: rgba(249, 249, 254, 0.8);
+    backdrop-filter: blur(20px);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .ambient-shadow {
+    box-shadow: 0 24px 48px -12px rgba(26, 28, 31, 0.06);
+  }
+
+  .input-minimal {
+    border: none;
+    border-bottom: 2px solid #e2e2e7;
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    transition: border-color 0.3s ease;
+  }
+
+  .input-minimal:focus {
+    outline: none;
+    box-shadow: none;
+    border-bottom-color: #006e1a;
   }
 
   .safe-zone-radar {

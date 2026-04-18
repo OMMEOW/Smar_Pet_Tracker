@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guardian Kinetic | Precision Tracking for the Modern Guardian</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#f9f9fe",
+                    "primary-fixed-dim": "#46e354",
+                    "primary-fixed": "#71ff74",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#d9dade",
+                    "primary-container": "#28cd41",
+                    "surface-container-highest": "#e2e2e7",
+                    "on-tertiary-fixed": "#410001",
+                    "on-surface-variant": "#3d4a3a",
+                    "inverse-surface": "#2e3034",
+                    "on-secondary-container": "#626267",
+                    "secondary-container": "#e0dfe4",
+                    "on-secondary-fixed-variant": "#46464b",
+                    "on-background": "#1a1c1f",
+                    "secondary": "#5d5e63",
+                    "outline": "#6d7b68",
+                    "on-secondary-fixed": "#1a1b1f",
+                    "surface-variant": "#e2e2e7",
+                    "on-tertiary-fixed-variant": "#930005",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#005010",
+                    "on-primary-fixed-variant": "#005311",
+                    "inverse-primary": "#46e354",
+                    "secondary-fixed": "#e3e2e7",
+                    "on-tertiary-container": "#8f0005",
+                    "surface-container-low": "#f3f3f8",
+                    "surface-container-high": "#e8e8ed",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#c0000a",
+                    "secondary-fixed-dim": "#c6c6cb",
+                    "primary": "#006e1a",
+                    "tertiary-container": "#ff9587",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#bccbb5",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#ffb4aa",
+                    "tertiary-fixed": "#ffdad5",
+                    "on-surface": "#1a1c1f",
+                    "inverse-on-surface": "#f0f0f5",
+                    "surface-tint": "#006e1a",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed": "#002203",
+                    "background": "#f9f9fe",
+                    "surface-bright": "#f9f9fe",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#ededf2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9f9fe; color: #1a1c1f; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #006e1a 0%, #28cd41 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="sticky top-0 w-full z-50 bg-white/80 dark:bg-[#2e3034]/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] font-['Manrope'] tracking-tight">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
+<div class="text-xl font-bold tracking-tighter text-[#1a1c1f] dark:text-[#f9f9fe]">Guardian Kinetic</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-[#1a1c1f]/70 dark:text-[#f9f9fe]/70 font-medium hover:text-[#006e1a] dark:hover:text-[#71ff74] transition-colors duration-300" href="#">Features</a>
+<a class="text-[#1a1c1f]/70 dark:text-[#f9f9fe]/70 font-medium hover:text-[#006e1a] dark:hover:text-[#71ff74] transition-colors duration-300" href="#">Live Tracking</a>
+<a class="text-[#1a1c1f]/70 dark:text-[#f9f9fe]/70 font-medium hover:text-[#006e1a] dark:hover:text-[#71ff74] transition-colors duration-300" href="#">Safe Zones</a>
+<a class="text-[#1a1c1f]/70 dark:text-[#f9f9fe]/70 font-medium hover:text-[#006e1a] dark:hover:text-[#71ff74] transition-colors duration-300" href="#">Support</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-[#1a1c1f]/70 font-medium hover:text-[#006e1a] transition-colors">Log In</button>
+<button class="bg-[#006e1a] text-white px-6 py-2.5 rounded-full font-bold text-sm scale-95 hover:scale-100 duration-200 ease-in-out">Get Started</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative pt-20 pb-32 overflow-hidden bg-surface">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="z-10">
+<span class="inline-block label-sm bg-primary-container/10 text-primary px-4 py-1.5 rounded-full font-bold tracking-widest text-[10px] uppercase mb-6">Unrivaled Precision</span>
+<h1 class="text-6xl md:text-7xl font-extrabold tracking-tighter text-on-background mb-8 leading-[0.95]">
+                        The watchtower for your <span class="text-primary italic">wildest</span> friend.
+                    </h1>
+<p class="text-xl text-secondary mb-10 max-w-lg leading-relaxed">
+                        Guardian Kinetic delivers Swiss-grade tracking accuracy and real-time health diagnostics, ensuring your guardian is never out of reach.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="primary-gradient text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-primary/20 transition-transform active:scale-95">Protect Your Dog Now</button>
+<button class="bg-surface-container-low border border-outline-variant/20 text-on-surface px-8 py-4 rounded-full font-bold text-lg hover:bg-surface-container-high transition-colors">Explore Features</button>
+</div>
+<div class="mt-12 flex items-center gap-6">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-surface bg-slate-200 overflow-hidden"><img class="w-full h-full object-cover" data-alt="portrait of a happy yellow labrador retriever outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9xgKhlzOGtulSXeO2SVUWqI3k7ppzWe3YV7xQvQ2li8praYx2GIGiwQTrH_MgbZ9HIa8b_tI5h2AVeHdSUKkNv9Yp0v697I5Zj1-6U_mq86_46C4ZWkgVR_UeXF6FOk_dE25iJ935wqwWGL5MWYRNoyGLjN7zmNq161RpZVpAzfdC8LGvXoFdpftSuOyIB7zzx0YCez7IpMrUXODgxka9hg31N0uj3tOyctXTZ5p88Ev9D1y2piuhXZoirige-Q6qyGu3Y78b-A0"/></div>
+<div class="w-10 h-10 rounded-full border-2 border-surface bg-slate-300 overflow-hidden"><img class="w-full h-full object-cover" data-alt="portrait of a beagle dog with soft sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWPH6KGl-IAEtCmlIVF3UEciKcKgPJ6IR41aMIVyW9KD0RveL4e65t3_tOoE6mRjn5ZSRmm2EKRFJzvmdfutA9Zr0dQPgA9w0Wt-xG15WC9la8b4J3Fv2hTBOQMmAoEuXPQdO2e7HmPyhOKzZh6kcwyqanBPg0ZR6LKjxF-D8t40UaeasJqz6E4q1SPj7AwoKaFATOdy1Bvhpwk1lpd-5-t1G3LiV-iCbtEP8F_peQfCMb7c9PYF-OxfwrDPJ1n_D5Jy9ofUwTeS4"/></div>
+<div class="w-10 h-10 rounded-full border-2 border-surface bg-slate-400 overflow-hidden"><img class="w-full h-full object-cover" data-alt="close up of a french bulldog looking at the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFJXlvg2gOkBlMLzuAp-Ps9Ns3ksV8usItKOzwYnfbVc-0kM8cp0Dsx3USW1NtbRV6BVAf0COiTl35BQ0gElF4EARjgDDVAJC7knBDpVqlWhn1Mw2uMq8VgllJ68ZoJ770IlERTs60MC7U2d3meowglIhm7XQtSPpwEIZWxYKVaJ6ZtSxcuSDbW6DygKXMPBWy9bzkMVRkq6Xo6Yis_r1MXMOB7LnR5KFL-6dGjn2pnEwoSVJU9g9EXtftwRaBsgIK3l6gWZgQVBU"/></div>
+</div>
+<p class="text-sm text-secondary font-medium"><span class="text-on-background font-bold">4,000+</span> Modern Guardians protected.</p>
+</div>
+</div>
+<div class="relative lg:h-[600px]">
+<div class="absolute inset-0 bg-primary-container/5 rounded-[48px] rotate-3 translate-x-4"></div>
+<div class="relative h-full rounded-[48px] overflow-hidden shadow-2xl">
+<img class="w-full h-full object-cover" data-alt="a golden retriever running through a lush green park with mountains in the background during golden hour" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCql8igzVfzua3xXFbSXHwlUuUPoX6blT98c9vrpOC-csn2HqQPrT1rKUknVoVV5qddi5sNm9pTFLQ-EHSWGeAL7BLCg2W0FSi-SVyzra0nuiYqWih-sMCQRuZ4RzyIV0nuJshaoWzlDUx4mu9R92iq8JE4qhR28pHt83gxMEHkTL-8Pxyu-zSanmMxejqYGVRo-JLksTWXpULUxhhNDvgZjfo5GCRe9SBmpKz2yudDR7FtCYJ_U6IQD9-ScenlCWTc6A6tLizan2w"/>
+<div class="absolute bottom-8 left-8 right-8 glass-card rounded-3xl p-6 flex items-center gap-4 border border-white/20">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Luna is Safe</h4>
+<p class="text-sm text-secondary">Central Park · Active 2m ago</p>
+</div>
+<div class="ml-auto">
+<div class="w-12 h-6 bg-primary-fixed rounded-full flex items-center px-1">
+<div class="w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Features -->
+<section class="py-32 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-20 max-w-2xl">
+<h2 class="text-5xl font-extrabold tracking-tight mb-6">Designed for peace of mind.</h2>
+<p class="text-xl text-secondary">Advanced IoT technology paired with an editorial design that makes monitoring your pet an aesthetic experience.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[300px]">
+<!-- Live Map -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-[2rem] p-8 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="material-symbols-outlined text-primary mb-4 text-3xl">map</span>
+<h3 class="text-2xl font-bold mb-2">Live Map Precision</h3>
+<p class="text-secondary max-w-sm">Sub-meter accuracy using multi-constellation GNSS satellites. Never lose sight, even in dense urban forests.</p>
+</div>
+<div class="absolute bottom-0 right-0 w-1/2 h-full opacity-40 md:opacity-100 transition-transform group-hover:scale-105 duration-700">
+<img class="w-full h-full object-cover mask-gradient" data-alt="clean minimal vector map of a park area with a glowing green tracking dot" data-location="New York" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA38hF0OHyzYwNru92z12P7xim9HaDN78To0H8IFYv7yKQrv6ifT3QCAlalZ2pgV0Dp0q1i5Kpq22jystCbC_8lNMcs2UXyR5YFDFqrnjyQE1KOS3hQmsS8z-Y3rbxqDcEdWlrktFreb8rmnNhUK3jqIia8FlPKnGUZx3teGMHHWxscKKJiy6pa_TMwNVomIUw9Q5h3QR7IRrglQLtfJS0Lyegq6Ol5kULzmkLcW8LM6dS5dlcW7fyvUnjvhO1Q_Cef85c8HsM8NDg"/>
+</div>
+</div>
+<!-- Health Alerts -->
+<div class="md:col-span-4 bg-primary-container text-on-primary-container rounded-[2rem] p-8 flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined mb-4 text-3xl">favorite</span>
+<h3 class="text-2xl font-bold mb-2">Health Diagnostics</h3>
+<p class="opacity-80">Monitoring heart rate and sleep patterns to catch anomalies before they become emergencies.</p>
+</div>
+<div class="flex items-end justify-between">
+<div class="text-4xl font-bold">98<span class="text-lg opacity-60">bpm</span></div>
+<div class="flex gap-1">
+<div class="w-1.5 h-6 bg-on-primary-container/20 rounded-full"></div>
+<div class="w-1.5 h-8 bg-on-primary-container/40 rounded-full"></div>
+<div class="w-1.5 h-10 bg-on-primary-container rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Geofencing -->
+<div class="md:col-span-4 bg-surface-container-high rounded-[2rem] p-8 flex flex-col justify-center text-center">
+<div class="w-20 h-20 rounded-full bg-white mx-auto mb-6 flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-4xl">radar</span>
+</div>
+<h3 class="text-xl font-bold mb-2">Smart Safe Zones</h3>
+<p class="text-secondary text-sm">Draw custom boundaries on your phone. Get instant alerts when they're breached.</p>
+</div>
+<!-- Safe-Zone Radar UI -->
+<div class="md:col-span-8 bg-inverse-surface text-inverse-on-surface rounded-[2rem] p-8 flex items-center gap-12 overflow-hidden">
+<div class="shrink-0 relative">
+<div class="w-48 h-48 rounded-full border border-primary/30 flex items-center justify-center">
+<div class="w-32 h-32 rounded-full border border-primary/60 flex items-center justify-center">
+<div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+<div class="w-4 h-4 bg-primary rounded-full shadow-[0_0_15px_#28cd41]"></div>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-2xl font-bold mb-4">The Kinetic Shield</h3>
+<p class="text-inverse-on-surface/60 mb-6">Our proprietary algorithm predicts movement patterns to alert you seconds *before* a boundary is crossed.</p>
+<button class="text-primary-fixed font-bold flex items-center gap-2">Learn more <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How it Works -->
+<section class="py-32 bg-surface">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+<div class="max-w-xl">
+<span class="label-sm text-primary font-bold tracking-widest uppercase mb-4 block">The Process</span>
+<h2 class="text-5xl font-extrabold tracking-tight">Three steps to eternal vigilance.</h2>
+</div>
+<div class="hidden md:block h-px flex-1 mx-12 bg-outline-variant/20 mb-6"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+<div class="group">
+<div class="text-8xl font-black text-surface-container-high mb-8 group-hover:text-primary-container/20 transition-colors">01</div>
+<h4 class="text-2xl font-bold mb-4">Attach the Kinetic Collar</h4>
+<p class="text-secondary leading-relaxed">Aerospace-grade aluminum housing that weighs less than an ounce. Rugged, waterproof, and bite-resistant.</p>
+</div>
+<div class="group">
+<div class="text-8xl font-black text-surface-container-high mb-8 group-hover:text-primary-container/20 transition-colors">02</div>
+<h4 class="text-2xl font-bold mb-4">Sync with the Guardian App</h4>
+<p class="text-secondary leading-relaxed">Instant pairing via Bluetooth 5.2. Access your dog's dashboard from any device, anywhere in the world.</p>
+</div>
+<div class="group">
+<div class="text-8xl font-black text-surface-container-high mb-8 group-hover:text-primary-container/20 transition-colors">03</div>
+<h4 class="text-2xl font-bold mb-4">Set Your Safe Zones</h4>
+<p class="text-secondary leading-relaxed">Define the perimeter of your home, park, or day care. Relax knowing we're always watching over them.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA Section -->
+<section class="py-24 px-6">
+<div class="max-w-7xl mx-auto">
+<div class="primary-gradient rounded-[3rem] p-12 md:p-24 text-center text-white relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-white blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white blur-[120px] rounded-full"></div>
+</div>
+<div class="relative z-10">
+<h2 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-8 max-w-3xl mx-auto leading-tight">Ready to upgrade your dog's security?</h2>
+<p class="text-xl text-white/80 mb-12 max-w-xl mx-auto">Join the community of modern guardians who choose precision over guesswork.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-6">
+<button class="bg-white text-primary px-10 py-5 rounded-full font-bold text-xl shadow-2xl transition-transform hover:scale-105 active:scale-95">Get Started Today</button>
+<button class="bg-transparent border border-white/30 text-white px-10 py-5 rounded-full font-bold text-xl backdrop-blur-sm hover:bg-white/10 transition-colors">Speak to an Expert</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#f3f3f8] dark:bg-[#1a1c1f] w-full py-12 px-6">
+<div class="max-w-7xl mx-auto border-t border-[#bccbb5]/20 pt-12">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+<div>
+<div class="font-['Manrope'] font-bold text-[#1a1c1f] dark:text-[#f9f9fe] text-2xl mb-4">Guardian Kinetic</div>
+<p class="text-secondary opacity-60 max-w-xs font-['Inter'] text-sm tracking-wide">
+                        Precision Tracking for the Modern Guardian. Engineered for reliability, designed for the soul.
+                    </p>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="flex flex-col gap-3">
+<a class="text-secondary opacity-60 hover:opacity-100 transition-opacity font-['Inter'] text-sm tracking-wide" href="#">Privacy Policy</a>
+<a class="text-secondary opacity-60 hover:opacity-100 transition-opacity font-['Inter'] text-sm tracking-wide" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-3">
+<a class="text-secondary opacity-60 hover:opacity-100 transition-opacity font-['Inter'] text-sm tracking-wide" href="#">Safety Standards</a>
+<a class="text-secondary opacity-60 hover:opacity-100 transition-opacity font-['Inter'] text-sm tracking-wide" href="#">Contact Us</a>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-outline-variant/10 pt-8">
+<div class="text-secondary opacity-60 font-['Inter'] text-sm tracking-wide">
+                    © 2024 Guardian Kinetic. Precision Tracking for the Modern Guardian.
+                </div>
+<div class="flex gap-6">
+<span class="material-symbols-outlined text-secondary opacity-60 cursor-pointer hover:text-primary transition-colors">social_leaderboard</span>
+<span class="material-symbols-outlined text-secondary opacity-60 cursor-pointer hover:text-primary transition-colors">share</span>
+<span class="material-symbols-outlined text-secondary opacity-60 cursor-pointer hover:text-primary transition-colors">rss_feed</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

@@ -16,6 +16,7 @@ const LocationSchema = new Schema({
 
 // Pet Status Schema
 const PetStatusSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   petId: { type: String, default: "default_pet" },
   location: { type: LocationSchema },
   geofence: { type: GeofenceSchema },
@@ -24,11 +25,20 @@ const PetStatusSchema = new Schema({
 
 // Pet History Schema
 const PetHistorySchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   petId: { type: String, default: "default_pet" },
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   timestamp: { type: Number, required: true, index: true },
 });
 
+// User Schema
+const UserSchema = new Schema({
+  name: { type: String, required: false },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 export const PetStatus = models.PetStatus || model("PetStatus", PetStatusSchema);
 export const PetHistory = models.PetHistory || model("PetHistory", PetHistorySchema);
+export const User = models.User || model("User", UserSchema);
