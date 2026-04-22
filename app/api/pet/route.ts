@@ -52,10 +52,11 @@ export async function POST(request: Request) {
     const userId = (session.user as any).id;
     await dbConnect();
     const data = await request.json();
+    const petId = data.petId || "default_pet";
 
     const status = await PetStatus.findOneAndUpdate(
-      { userId, petId: "default_pet" },
-      { $set: { ...data, userId } },
+      { userId, petId },
+      { $set: { ...data, userId, petId } },
       { new: true, upsert: true }
     );
 

@@ -15,7 +15,8 @@ export function Navbar() {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-[#f9f9fe]/80 dark:bg-[#1a1c1f]/80 backdrop-blur-xl font-headline font-semibold tracking-tight text-sm top-0 sticky z-50 no-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex justify-between items-center w-full px-6 py-4 mx-auto">
+    <header className="bg-[#f9f9fe]/80 dark:bg-[#1a1c1f]/80 backdrop-blur-xl font-headline font-semibold tracking-tight text-sm top-0 sticky z-50 no-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none w-full">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 flex justify-between items-center w-full">
       <div className="flex items-center gap-4">
         <Link href="/" className="font-headline font-extrabold text-xl tracking-tighter text-slate-900 dark:text-slate-50">
           Guardian Kinetic
@@ -75,6 +76,7 @@ export function Navbar() {
             Login
           </Link>
         )}
+      </div>
       </div>
     </header>
   );

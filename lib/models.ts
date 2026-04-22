@@ -17,7 +17,13 @@ const LocationSchema = new Schema({
 // Pet Status Schema
 const PetStatusSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  petId: { type: String, default: "default_pet" },
+  petId: { type: String, required: true },
+  name: { type: String, default: "Apollo" },
+  species: { type: String, default: "Canine" },
+  breed: { type: String, default: "Golden Retriever" },
+  age: { type: String, default: "4 Years" },
+  weight: { type: String, default: "32 kg" },
+  imageUrl: { type: String },
   location: { type: LocationSchema },
   geofence: { type: GeofenceSchema },
   alert: { type: Boolean, default: false },

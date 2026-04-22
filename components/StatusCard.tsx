@@ -28,7 +28,7 @@ export function StatusCard({ location, alert, petName = "Apollo" }: StatusCardPr
         <span className="text-[10px] font-medium text-secondary opacity-60">ID: GK-8821</span>
       </div>
       
-      <h2 className="font-headline text-3xl font-extrabold tracking-tight mb-4 text-on-surface">{petName}</h2>
+      <h2 className="font-headline text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight mb-4 text-on-surface">{petName}</h2>
       
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">

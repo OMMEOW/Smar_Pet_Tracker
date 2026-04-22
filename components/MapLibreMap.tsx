@@ -12,6 +12,7 @@ interface MapLibreMapProps {
   activeLassoPoints: [number, number][];
   onLassoPointsChange: (points: [number, number][]) => void;
   onLassoFinish?: (coords: [number, number][]) => void;
+  petImageUrl?: string;
 }
 
 export default function MapLibreMap({
@@ -22,6 +23,7 @@ export default function MapLibreMap({
   activeLassoPoints,
   onLassoPointsChange,
   onLassoFinish,
+  petImageUrl,
 }: MapLibreMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -131,13 +133,25 @@ export default function MapLibreMap({
           'circle-stroke-color': '#ffffff'
         }
       });
-    });
 
-    return () => {
-      map.current?.remove();
-      map.current = null;
-      dogMarker.current = null;
-    };
+      // Handle resize events
+      const handleResize = () => {
+        map.current?.resize();
+      };
+      window.addEventListener('resize', handleResize);
+      
+      // Force a resize after mount to handle layout shifts
+      setTimeout(() => {
+        map.current?.resize();
+      }, 500);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        map.current?.remove();
+        map.current = null;
+        dogMarker.current = null;
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -188,7 +202,7 @@ export default function MapLibreMap({
         el.innerHTML = `
           <div class="pulse-ring"></div>
           <div class="marker-core">
-            <img src="/dog.png" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuB0JkAhNjWRcWR7pkHly0EkTWpfcUfWqJYPKXtLufaBXrObP6sPOOfalir6ye5SyE_tbZKBpuYxIEt51bJzM0StdcQ6iFr5TI8s0KhgmIQDdKGSPQJ6khZTn95VXBPiB8GPSke50dNQmWXHEEr9H79jwRobrGF8ndrHGAHuNoHxp_NWMqFIBIJl0dcJtXh5x159r1DCVlE2D73W8mgoGtYfm6TG9RitlhamO-MiWzHOao6mLJ-0XCFGpMT7SKXn4PPsGpkm6M7ghWA'" />
+            <img src="${petImageUrl || '/dog.png'}" onerror="this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuB0JkAhNjWRcWR7pkHly0EkTWpfcUfWqJYPKXtLufaBXrObP6sPOOfalir6ye5SyE_tbZKBpuYxIEt51bJzM0StdcQ6iFr5TI8s0KhgmIQDdKGSPQJ6khZTn95VXBPiB8GPSke50dNQmWXHEEr9H79jwRobrGF8ndrHGAHuNoHxp_NWMqFIBIJl0dcJtXh5x159r1DCVlE2D73W8mgoGtYfm6TG9RitlhamO-MiWzHOao6mLJ-0XCFGpMT7SKXn4PPsGpkm6M7ghWA'" />
           </div>
         `;
 
@@ -197,9 +211,11 @@ export default function MapLibreMap({
           .addTo(map.current);
       } else {
         dogMarker.current.setLngLat([markerPosition[1], markerPosition[0]]);
+        const img = dogMarker.current.getElement().querySelector('img');
+        if (img) img.src = petImageUrl || '/dog.png';
       }
     }
-  }, [markerPosition]);
+  }, [markerPosition, petImageUrl]);
 
   useEffect(() => {
     if (!map.current) return;

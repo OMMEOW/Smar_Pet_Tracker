@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light">
-      <body>
+      <body className="antialiased overflow-x-hidden">
         <AuthProvider>
           {children}
         </AuthProvider>

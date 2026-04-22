@@ -17,9 +17,9 @@ export function AlertsSection({ alerts = [] }: AlertsSectionProps) {
   ];
 
   return (
-    <div className="flex-1 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-3xl p-6 shadow-xl border border-outline-variant/10 pointer-events-auto overflow-hidden flex flex-col min-h-0">
+    <div className="flex-1 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-3xl p-4 md:p-6 shadow-xl border border-outline-variant/10 pointer-events-auto overflow-hidden flex flex-col min-h-0">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-headline font-bold text-lg text-on-surface">Recent Alerts</h3>
+        <h3 className="font-headline font-bold text-base md:text-lg lg:text-xl text-on-surface">Recent Alerts</h3>
         <span className="bg-tertiary/10 text-tertiary text-[10px] font-black px-2 py-1 rounded-lg">LIVE</span>
       </div>
       

@@ -51,15 +51,15 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-surface">
+    <div className="flex flex-col min-h-screen bg-surface">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 md:ml-64 p-8 overflow-y-auto custom-scrollbar">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
           <div className="max-w-4xl mx-auto">
-            <header className="mb-10">
-              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">Timeline</p>
-              <h1 className="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Location History</h1>
+            <header className="mb-10 md:mb-16">
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Timeline</p>
+              <h1 className="font-headline text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-on-surface">Location History</h1>
               <p className="text-secondary mt-2 font-medium">Tracking the kinetic journey of your companion.</p>
             </header>
 

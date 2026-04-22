@@ -12,60 +12,59 @@ function cn(...inputs: ClassValue[]) {
 export function Sidebar() {
   const pathname = usePathname();
 
-  return (
-    <aside className="hidden md:flex flex-col fixed left-0 top-[72px] h-[calc(100vh-72px)] p-6 gap-8 bg-surface-container-low dark:bg-[#2e3034] w-64 border-r-0 font-body font-medium text-xs uppercase tracking-widest z-40">
-      <div className="flex flex-col gap-2">
-        <Link 
-          href="/" 
-          className={cn(
-            "flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm transition-all duration-200 hover:translate-x-1",
-            pathname === "/" 
-              ? "bg-surface-container-lowest dark:bg-[#1a1c1f] text-primary dark:text-[#28cd41] shadow-md" 
-              : "text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5"
-          )}
-        >
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === "/" ? "'FILL' 1" : "" }}>map</span>
-          <span>Live Map</span>
-        </Link>
-        <Link 
-          href="/history" 
-          className={cn(
-            "flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm transition-all duration-200 hover:translate-x-1",
-            pathname === "/history" 
-              ? "bg-surface-container-lowest dark:bg-[#1a1c1f] text-primary dark:text-[#28cd41] shadow-md" 
-              : "text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5"
-          )}
-        >
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === "/history" ? "'FILL' 1" : "" }}>monitoring</span>
-          <span>Activity</span>
-        </Link>
-        <Link 
-          href="/settings" 
-          className={cn(
-            "flex items-center gap-3 rounded-xl px-4 py-3 shadow-sm transition-all duration-200 hover:translate-x-1",
-            pathname === "/settings" 
-              ? "bg-surface-container-lowest dark:bg-[#1a1c1f] text-primary dark:text-[#28cd41] shadow-md" 
-              : "text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-white/5"
-          )}
-        >
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: pathname === "/settings" ? "'FILL' 1" : "" }}>radar</span>
-          <span>Safe Zones</span>
-        </Link>
-      </div>
+  const navItems = [
+    { href: "/", icon: "dashboard", label: "Dashboard" },
+    { href: "/pets", icon: "pets", label: "My Pets" },
+    { href: "/history", icon: "monitoring", label: "Activity" },
+    { href: "/settings", icon: "radar", label: "Safe Zones" },
+    { href: "/profile", icon: "person", label: "Profile" },
+  ];
 
-      <div className="mt-auto pb-4">
-        <div className="bg-surface-container-lowest dark:bg-inverse-surface p-4 rounded-2xl shadow-sm border border-outline-variant/10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-primary">battery_charging_full</span>
-            </div>
-            <div>
-              <p className="text-[10px] text-on-secondary-container font-bold">BATTERY</p>
-              <p className="text-sm font-bold normal-case text-on-surface">84% Charged</p>
-            </div>
+  return (
+    <aside className="hidden md:flex flex-col sticky top-[72px] h-[calc(100vh-72px)] p-4 bg-white dark:bg-neutral-950 w-64 border-r dark:border-neutral-800 z-40 shrink-0">
+      <nav className="flex-1 space-y-1">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link 
+              key={item.href}
+              href={item.href} 
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                isActive 
+                  ? "bg-primary/5 text-primary font-bold shadow-sm" 
+                  : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              )}
+            >
+              <span 
+                className={cn(
+                  "material-symbols-outlined transition-all",
+                  isActive && "scale-110"
+                )} 
+                style={{ fontVariationSettings: isActive ? "'FILL' 1" : "" }}
+              >
+                {item.icon}
+              </span>
+              <span className="text-sm font-semibold font-headline tracking-tight uppercase tracking-[0.05em]">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="mt-auto pt-6 border-t dark:border-neutral-800 space-y-4">
+        <Link href="/pets/add" className="w-full flex items-center justify-center gap-2 primary-gradient text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+          <span className="material-symbols-outlined text-sm">add</span>
+          Add New Device
+        </Link>
+        
+        <div className="bg-surface-container-low dark:bg-neutral-900/50 p-4 rounded-2xl border border-outline-variant/10">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="material-symbols-outlined text-primary text-sm">battery_charging_full</span>
+            <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Network Status</span>
           </div>
-          <div className="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
-            <div className="bg-primary w-[84%] h-full transition-all duration-1000"></div>
+          <div className="flex items-center justify-between">
+             <span className="text-xs font-bold text-on-surface">84% Battery</span>
+             <span className="text-[10px] text-primary font-bold">ACTIVE</span>
           </div>
         </div>
       </div>

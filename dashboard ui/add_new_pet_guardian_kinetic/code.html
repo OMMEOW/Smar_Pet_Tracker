@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Pet | The Kinetic Guardian</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#d9dade",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#bccbb5",
+                        "on-tertiary-fixed": "#410001",
+                        "surface-container-low": "#f3f3f8",
+                        "on-tertiary-container": "#8f0005",
+                        "outline": "#6d7b68",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#006e1a",
+                        "surface-container-highest": "#e2e2e7",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#002203",
+                        "tertiary-fixed": "#ffdad5",
+                        "secondary": "#5d5e63",
+                        "primary-fixed-dim": "#46e354",
+                        "primary": "#006e1a",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e2e2e7",
+                        "primary-fixed": "#71ff74",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#e0dfe4",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#3d4a3a",
+                        "inverse-surface": "#2e3034",
+                        "on-background": "#1a1c1f",
+                        "on-secondary-fixed-variant": "#46464b",
+                        "tertiary": "#c0000a",
+                        "inverse-on-surface": "#f0f0f5",
+                        "surface": "#f9f9fe",
+                        "on-surface": "#1a1c1f",
+                        "on-primary-fixed-variant": "#005311",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "on-primary-container": "#005010",
+                        "surface-bright": "#f9f9fe",
+                        "primary-container": "#28cd41",
+                        "inverse-primary": "#46e354",
+                        "secondary-fixed-dim": "#c6c6cb",
+                        "on-secondary-container": "#626267",
+                        "tertiary-container": "#ff9587",
+                        "secondary-fixed": "#e3e2e7",
+                        "on-tertiary-fixed-variant": "#930005",
+                        "background": "#f9f9fe",
+                        "surface-container-high": "#e8e8ed",
+                        "surface-container": "#ededf2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #006e1a 0%, #28cd41 100%);
+        }
+        .glass-panel {
+            background: rgba(249, 249, 254, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e2e7;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-hidden">
+<!-- Sidebar (Desktop Only) -->
+<aside class="hidden md:flex h-screen w-72 fixed left-0 top-0 bg-white dark:bg-neutral-950 shadow-[24px_0_40px_-20px_rgba(0,0,0,0.06)] flex-col p-4 gap-2 z-50">
+<div class="mb-8 px-4">
+<h1 class="text-lg font-black text-neutral-900 dark:text-white font-headline">Guardian Kinetic</h1>
+<p class="text-xs font-label text-secondary">Precision Tracking</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-semibold font-headline">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="location_searching">location_searching</span>
+<span class="text-sm font-semibold font-headline">Live Track</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl font-bold translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-sm font-semibold font-headline">My Pets</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="monitor_heart">monitor_heart</span>
+<span class="text-sm font-semibold font-headline">Health</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-sm font-semibold font-headline">Profile</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-surface-container-highest/50">
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-sm font-semibold font-headline">Help</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm font-semibold font-headline">Sign Out</span>
+</a>
+</div>
+</aside>
+<main class="md:ml-72 min-h-screen flex flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-40 glass-panel shadow-sm shadow-neutral-900/5 px-6 py-4 flex justify-between items-center w-full max-w-full">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-neutral-600 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<div class="md:hidden">
+<span class="text-xl font-extrabold tracking-tight text-neutral-900 dark:text-white font-headline">The Kinetic Guardian</span>
+</div>
+<div class="hidden md:block">
+<h2 class="text-2xl font-bold font-headline text-neutral-900">Add New Pet</h2>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-neutral-500 hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-neutral-500 hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden shadow-sm">
+<img alt="User profile avatar" data-alt="Close-up portrait of a friendly professional man in his 30s with soft natural lighting and a blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCavpLnHW4q8uRKRRezgCVx1QIWafCRxHJtPpDPQaPa-gBezsA94f3sIpVtGkRmANA74xBo5-FRrCP9uOqw8r__57tg4D8IZEwLwkrsGSSrF9kxPN3KqX0mZ2otAIFhDL2uE6P96ufeI1rxUDtSFLxTZTMWuOE5ISM-CaC6L5ZLWNc8YrF23PHd7-V80EiU0I6PbNLiAIR09f_qnlRQErmfCaoyOasFsG4kxsL_X-j2DYssxICPhmZHQZp8HiMnqSfmLjlZJdA5rjA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="flex-1 p-6 md:p-12 max-w-7xl mx-auto w-full overflow-y-auto custom-scrollbar">
+<!-- Asymmetric Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Contextual Card -->
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-sm">
+<div class="w-16 h-16 rounded-2xl primary-gradient flex items-center justify-center text-white mb-6">
+<span class="material-symbols-outlined text-3xl" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+</div>
+<h3 class="text-3xl font-extrabold font-headline leading-tight tracking-tight mb-4">Start Your Journey.</h3>
+<p class="text-secondary text-sm leading-relaxed font-label">
+                            Secure your pet's future with precision Kinetic tracking. Our Guardian system provides real-time location alerts and health monitoring for your companion.
+                        </p>
+</div>
+<!-- Small Bento Stats -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low rounded-2xl p-4 flex flex-col justify-between h-32">
+<span class="material-symbols-outlined text-primary" data-icon="verified">verified</span>
+<div>
+<span class="block text-xl font-bold font-headline">99.9%</span>
+<span class="text-xs text-secondary font-label uppercase tracking-widest">Accuracy</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-2xl p-4 flex flex-col justify-between h-32">
+<span class="material-symbols-outlined text-primary" data-icon="battery_charging_full">battery_charging_full</span>
+<div>
+<span class="block text-xl font-bold font-headline">30 Days</span>
+<span class="text-xs text-secondary font-label uppercase tracking-widest">Battery</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Registration Form -->
+<div class="lg:col-span-8">
+<div class="bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+<form class="space-y-10">
+<!-- Image Upload Zone -->
+<div class="space-y-4">
+<label class="label-md font-semibold text-secondary uppercase tracking-widest text-xs">Pet Portrait</label>
+<div class="group relative w-full h-48 rounded-2xl bg-surface-container-low border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer overflow-hidden">
+<div class="flex flex-col items-center transition-transform group-hover:scale-105 duration-300">
+<span class="material-symbols-outlined text-4xl text-outline mb-2" data-icon="add_a_photo">add_a_photo</span>
+<span class="text-sm font-semibold text-outline">Click to upload photo</span>
+<span class="text-xs text-secondary/60 mt-1">High-quality portrait recommended</span>
+</div>
+<input class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+</div>
+</div>
+<!-- Basic Info Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="label-md font-semibold text-secondary text-xs uppercase tracking-widest">Pet Name</label>
+<input class="w-full bg-transparent border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 px-0 py-3 text-lg font-headline outline-none transition-colors" placeholder="e.g. Luna" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="label-md font-semibold text-secondary text-xs uppercase tracking-widest">Pet Type</label>
+<div class="flex flex-wrap gap-2 pt-2">
+<button class="px-4 py-2 rounded-full bg-primary text-white text-sm font-semibold flex items-center gap-2 shadow-md shadow-primary/20" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="dog">pets</span> Dog
+                                        </button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary text-sm font-semibold hover:bg-surface-container-highest transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="cat">pets</span> Cat
+                                        </button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary text-sm font-semibold hover:bg-surface-container-highest transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="pets">pets</span> Other
+                                        </button>
+</div>
+</div>
+</div>
+<!-- Detailed Specs -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-2">
+<label class="label-md font-semibold text-secondary text-xs uppercase tracking-widest">Breed</label>
+<input class="w-full bg-transparent border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 px-0 py-3 text-lg font-headline outline-none transition-colors" placeholder="e.g. Golden Retriever" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="label-md font-semibold text-secondary text-xs uppercase tracking-widest">Age (Years)</label>
+<div class="flex items-center gap-4">
+<input class="w-full bg-transparent border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 px-0 py-3 text-lg font-headline outline-none transition-colors" max="30" min="0" type="number" value="1"/>
+<div class="flex gap-1">
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="remove">remove</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-primary hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Validation Feedback Area (Conditional Example) -->
+<div class="p-4 bg-error-container/20 rounded-2xl flex gap-3 items-start border border-error/10">
+<span class="material-symbols-outlined text-error" data-icon="error_outline">error_outline</span>
+<div>
+<p class="text-sm font-semibold text-on-error-container">Incomplete Information</p>
+<p class="text-xs text-on-error-container/70">Please ensure all required fields are filled out to activate the tracking collar.</p>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="pt-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex items-center gap-3 text-secondary/60">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-xs font-label">Data is encrypted and stored securely.</span>
+</div>
+<button class="primary-gradient text-white px-10 py-4 rounded-full font-bold font-headline shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all text-center" type="submit">
+                                    Add Pet to Guardian
+                                </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 glass-panel px-6 py-3 flex justify-between items-center z-50">
+<a class="flex flex-col items-center gap-1 text-secondary" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Dash</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-secondary" href="#">
+<span class="material-symbols-outlined" data-icon="location_searching">location_searching</span>
+<span class="text-[10px] font-bold">Track</span>
+</a>
+<div class="relative -top-6">
+<button class="primary-gradient w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/40 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="add" style="font-variation-settings: 'wght' 700;">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="pets" style="font-variation-settings: 'FILL' 1;">pets</span>
+<span class="text-[10px] font-bold">Pets</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-secondary" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</a>
+</nav>
+</main>
+</body></html>

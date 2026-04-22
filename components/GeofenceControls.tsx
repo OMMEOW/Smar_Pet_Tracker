@@ -48,22 +48,22 @@ export function GeofenceControls({
 
   return (
     <>
-      <div className="bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-[2.5rem] p-5 shadow-2xl border border-outline-variant/10 pointer-events-auto">
-        <div className="flex items-center gap-3 mb-8">
+      <div className="bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-2xl rounded-[2.5rem] p-4 md:p-6 shadow-2xl border border-outline-variant/10 pointer-events-auto">
+        <div className="flex flex-col md:flex-row md:items-center gap-3 mb-8">
           <div className="flex-shrink-0 w-12 h-12 rounded-[1.25rem] bg-primary/10 flex items-center justify-center">
             <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-headline font-black text-lg text-on-surface leading-tight truncate">Safe Zone</h3>
+            <h3 className="font-headline font-black text-lg md:text-xl text-on-surface leading-tight truncate">Safe Zone</h3>
             <p className="text-[10px] font-black text-secondary/40 uppercase tracking-[0.2em]">Perimeter</p>
           </div>
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <select 
               value={mode}
               onChange={(e) => onModeChange(e.target.value as "circle" | "lasso")}
-              className="appearance-none bg-surface-container/50 border border-outline-variant/10 text-on-surface text-[10px] font-black uppercase tracking-widest pl-3 pr-8 py-2 rounded-xl cursor-pointer hover:bg-surface-container transition-all focus:ring-0 shadow-sm"
+              className="appearance-none w-full bg-surface-container/50 border border-outline-variant/10 text-on-surface text-[10px] font-black uppercase tracking-widest pl-3 pr-8 py-2 rounded-xl cursor-pointer hover:bg-surface-container transition-all focus:ring-0 shadow-sm"
             >
               <option value="circle">Circle</option>
               <option value="lasso">Lasso</option>
@@ -197,7 +197,7 @@ export function GeofenceControls({
           <button 
             onClick={handleSave}
             disabled={saving || (mode === "lasso" && geofence.type === "lasso" && geofence.coordinates.length < 3 && geofence.coordinates.length > 0)}
-            className="w-full mt-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+            className="w-full md:w-auto mt-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-4 px-8 rounded-2xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
           >
             {saving ? "Updating..." : "Update Geofence"}
           </button>
