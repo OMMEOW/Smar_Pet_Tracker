@@ -44,6 +44,8 @@ const UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  resetToken: { type: String, required: false },
+  resetTokenExpiry: { type: Date, required: false },
 });
 export const PetStatus = models.PetStatus || model("PetStatus", PetStatusSchema);
 export const PetHistory = models.PetHistory || model("PetHistory", PetHistorySchema);

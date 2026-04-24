@@ -2,14 +2,38 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LandingPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showLogoutMsg, setShowLogoutMsg] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("logout") === "true") {
+      setShowLogoutMsg(true);
+      const timer = setTimeout(() => {
+        setShowLogoutMsg(false);
+        // Clean up the URL
+        const newPath = window.location.pathname;
+        router.replace(newPath);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, router]);
 
   return (
-    <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen">
+    <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen relative">
+      {showLogoutMsg && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-primary text-on-primary px-8 py-3 rounded-full shadow-2xl font-headline font-bold flex items-center gap-3">
+            <span className="material-symbols-outlined">check_circle</span>
+            Logout successful. Your session has been secured.
+          </div>
+        </div>
+      )}
       {/* TopNavBar */}
       <nav className="sticky top-0 w-full z-50 bg-white/80 dark:bg-[#2e3034]/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] font-headline tracking-tight">
         <div className="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
@@ -13,7 +13,7 @@ import { Skeleton } from "boneyard-js/react";
 export default function PetsPage() {
   const { data: session, status: authStatus } = useSession();
   const router = useRouter();
-  
+
   const [pets, setPets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +29,10 @@ export default function PetsPage() {
     const fetchPets = async () => {
       try {
         const res = await fetch("/api/pet/all");
+        if (res.status === 401) {
+          signOut({ callbackUrl: "/?logout=true" });
+          return;
+        }
         const data = await res.json();
         if (res.ok) setPets(data);
       } catch (err) {
@@ -42,7 +46,15 @@ export default function PetsPage() {
   }, [authStatus]);
 
   if (authStatus === "loading") {
-    return <div className="h-screen w-screen bg-surface flex items-center justify-center text-on-surface font-headline">Syncing Kinetic Network...</div>;
+    return (
+      <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Kinetic Network</span>
+          <p className="text-secondary font-headline font-bold">Syncing Guardians...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -57,8 +69,8 @@ export default function PetsPage() {
                 <span className="text-xs font-black tracking-[0.15em] text-primary uppercase mb-2 block font-label">The Fleet</span>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold font-headline text-on-surface tracking-tight">Your Kinetic Guardians</h1>
               </div>
-              <Link 
-                href="/pets/add" 
+              <Link
+                href="/pets/add"
                 className="primary-gradient text-white px-8 py-4 rounded-full font-bold font-headline shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-center"
               >
                 + Add New Pet

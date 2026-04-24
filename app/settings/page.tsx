@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
@@ -27,6 +27,10 @@ export default function SettingsPage() {
     const fetchStatus = async () => {
       try {
         const res = await fetch("/api/pet");
+        if (res.status === 401) {
+          signOut({ callbackUrl: "/?logout=true" });
+          return;
+        }
         const data = await res.json();
         if (data && data.geofence) setGeofence(data.geofence);
         setLoading(false);
@@ -38,7 +42,15 @@ export default function SettingsPage() {
   }, [authStatus]);
 
   if (authStatus === "loading") {
-    return <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center text-white font-headline">Authenticating...</div>;
+    return (
+      <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Safe Zones</span>
+          <p className="text-secondary font-headline font-bold">Initializing Parameters...</p>
+        </div>
+      </div>
+    );
   }
 
   if (authStatus === "unauthenticated") {
@@ -78,50 +90,50 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-6">
-                   <div className="grid grid-cols-2 gap-6">
-                      <div className="relative group">
-                        <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Latitude</label>
-                        <input 
-                          className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface" 
-                          type="number" 
-                          step="any"
-                          value={geofence.lat}
-                          onChange={(e) => setGeofence({ ...geofence, lat: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div className="relative group">
-                        <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Longitude</label>
-                        <input 
-                          className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface" 
-                          type="number" 
-                          step="any"
-                          value={geofence.lng}
-                          onChange={(e) => setGeofence({ ...geofence, lng: parseFloat(e.target.value) || 0 })}
-                        />
-                      </div>
-                   </div>
-
-                   <div className="relative group">
-                      <div className="flex justify-between items-center mb-4">
-                        <label className="text-[10px] font-bold uppercase text-secondary ml-1 tracking-widest">Safe Zone Radius</label>
-                        <span className="bg-primary/10 text-primary text-xs font-black px-3 py-1 rounded-full">{geofence.radius}m</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="50" 
-                        max="1000" 
-                        step="10"
-                        value={geofence.radius}
-                        onChange={(e) => setGeofence({ ...geofence, radius: parseInt(e.target.value) })}
-                        className="w-full h-1.5 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary" 
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="relative group">
+                      <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Latitude</label>
+                      <input
+                        className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface"
+                        type="number"
+                        step="any"
+                        value={geofence.lat}
+                        onChange={(e) => setGeofence({ ...geofence, lat: parseFloat(e.target.value) || 0 })}
                       />
-                      <div className="flex justify-between mt-2 px-1">
-                        <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">50m</span>
-                        <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">1km</span>
-                      </div>
-                   </div>
+                    </div>
+                    <div className="relative group">
+                      <label className="block text-[10px] font-bold uppercase text-secondary mb-1 ml-1 tracking-widest">Longitude</label>
+                      <input
+                        className="w-full bg-transparent border-0 border-b-2 border-surface-container-highest focus:border-primary focus:ring-0 text-sm font-semibold py-2 px-1 transition-all text-on-surface"
+                        type="number"
+                        step="any"
+                        value={geofence.lng}
+                        onChange={(e) => setGeofence({ ...geofence, lng: parseFloat(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
 
-                   <button 
+                  <div className="relative group">
+                    <div className="flex justify-between items-center mb-4">
+                      <label className="text-[10px] font-bold uppercase text-secondary ml-1 tracking-widest">Safe Zone Radius</label>
+                      <span className="bg-primary/10 text-primary text-xs font-black px-3 py-1 rounded-full">{geofence.radius}m</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="50"
+                      max="1000"
+                      step="10"
+                      value={geofence.radius}
+                      onChange={(e) => setGeofence({ ...geofence, radius: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-surface-container-highest rounded-full appearance-none cursor-pointer accent-primary"
+                    />
+                    <div className="flex justify-between mt-2 px-1">
+                      <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">50m</span>
+                      <span className="text-[10px] font-bold text-secondary text-opacity-40 uppercase tracking-tighter">1km</span>
+                    </div>
+                  </div>
+
+                  <button
                     onClick={handleUpdate}
                     disabled={saving}
                     className="w-full mt-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold py-5 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50"

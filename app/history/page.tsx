@@ -11,7 +11,7 @@ interface HistoryEntry {
   timestamp: number;
 }
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function HistoryPage() {
@@ -32,6 +32,10 @@ export default function HistoryPage() {
     const fetchHistory = async () => {
       try {
         const res = await fetch("/api/pet/history");
+        if (res.status === 401) {
+          signOut({ callbackUrl: "/?logout=true" });
+          return;
+        }
         const data = await res.json();
         if (Array.isArray(data)) setHistory(data);
         setLoading(false);
@@ -43,7 +47,15 @@ export default function HistoryPage() {
   }, [authStatus]);
 
   if (authStatus === "loading") {
-    return <div className="h-screen w-screen bg-[#0a0a0a] flex items-center justify-center text-white font-headline">Authenticating...</div>;
+    return (
+      <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Kinetic Timeline</span>
+          <p className="text-secondary font-headline font-bold">Synchronizing History...</p>
+        </div>
+      </div>
+    );
   }
 
   if (authStatus === "unauthenticated") {
@@ -80,12 +92,12 @@ export default function HistoryPage() {
                         {i === 0 && <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-lg uppercase">Latest</span>}
                       </div>
                       <div className="grid grid-cols-2 gap-8">
-                         <div>
-                            <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Position</p>
-                            <p className="font-headline font-semibold text-on-surface">
-                                {entry.latitude.toFixed(6)}, {entry.longitude.toFixed(6)}
-                            </p>
-                         </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Position</p>
+                          <p className="font-headline font-semibold text-on-surface">
+                            {entry.latitude.toFixed(6)}, {entry.longitude.toFixed(6)}
+                          </p>
+                        </div>
 
                       </div>
                     </div>

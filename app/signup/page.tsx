@@ -8,6 +8,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [terms, setTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,10 +52,10 @@ export default function SignupPage() {
       <main className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 bg-surface-container-lowest rounded-xl overflow-hidden ambient-shadow">
         {/* Brand/Visual Side */}
         <section className="hidden md:block relative bg-surface-container-high overflow-hidden">
-          <img 
-            alt="Guardian Kinetic Protection" 
-            className="absolute inset-0 w-full h-full object-cover" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-vDCmjtwFAfyhX23pjcfeypPNiv3VeP0mH-iGPX7WJt5tbmUSaBs5EgFXWvMZxfrklK7stpSCisR8KAyU1DDSWTIJuHJDSQ7ygc4NMWmzJHpL053s7i_key0vpFltyOK6MvF4gVWtrKz1YNVljPMW3k4fbJTjsuZBm-E4Ep5ZH4hglsujhqjDi8ju1_aH-GsK27895i8jtFvuZ5a5Obm5z921lLuAryiJkEBhyCnl467TGQ5zDnsh04HdE2mn6eeweDmfyewFCM8" 
+          <img
+            alt="Guardian Kinetic Protection"
+            className="absolute inset-0 w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-vDCmjtwFAfyhX23pjcfeypPNiv3VeP0mH-iGPX7WJt5tbmUSaBs5EgFXWvMZxfrklK7stpSCisR8KAyU1DDSWTIJuHJDSQ7ygc4NMWmzJHpL053s7i_key0vpFltyOK6MvF4gVWtrKz1YNVljPMW3k4fbJTjsuZBm-E4Ep5ZH4hglsujhqjDi8ju1_aH-GsK27895i8jtFvuZ5a5Obm5z921lLuAryiJkEBhyCnl467TGQ5zDnsh04HdE2mn6eeweDmfyewFCM8"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-on-background/60 to-transparent"></div>
           <div className="absolute bottom-12 left-12 right-12 text-surface-container-lowest">
@@ -90,12 +91,12 @@ export default function SignupPage() {
             {/* Name Field */}
             <div className="relative group">
               <label className="block font-label text-xs font-semibold text-secondary mb-1" htmlFor="name">FULL NAME</label>
-              <input 
-                className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent" 
-                id="name" 
-                name="name" 
-                placeholder="Enter your name" 
-                required 
+              <input
+                className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent"
+                id="name"
+                name="name"
+                placeholder="Enter your name"
+                required
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -104,12 +105,12 @@ export default function SignupPage() {
             {/* Email Field */}
             <div className="relative group">
               <label className="block font-label text-xs font-semibold text-secondary mb-1" htmlFor="email">EMAIL ADDRESS</label>
-              <input 
-                className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent" 
-                id="email" 
-                name="email" 
-                placeholder="name@example.com" 
-                required 
+              <input
+                className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent"
+                id="email"
+                name="email"
+                placeholder="name@example.com"
+                required
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -119,27 +120,35 @@ export default function SignupPage() {
             <div className="relative group">
               <label className="block font-label text-xs font-semibold text-secondary mb-1" htmlFor="password">PASSWORD</label>
               <div className="relative">
-                <input 
-                  className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent pr-10" 
-                  id="password" 
-                  name="password" 
-                  placeholder="Create a secure password" 
-                  required 
-                  type="password"
+                <input
+                  className="input-minimal w-full font-body text-on-surface placeholder:text-outline-variant/50 focus:placeholder:text-transparent pr-10"
+                  id="password"
+                  name="password"
+                  placeholder="Create a secure password"
+                  required
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <span className="material-symbols-outlined absolute right-0 bottom-2 text-outline-variant cursor-pointer hover:text-primary transition-colors">visibility</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 bottom-2 text-outline-variant hover:text-primary transition-colors focus:outline-none"
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? "visibility" : "visibility_off"}
+                  </span>
+                </button>
               </div>
             </div>
             {/* Terms */}
             <div className="flex items-start gap-3 py-2">
               <div className="pt-0.5">
-                <input 
-                  className="rounded-sm border-outline-variant text-primary focus:ring-primary-container h-4 w-4" 
-                  id="terms" 
-                  name="terms" 
-                  required 
+                <input
+                  className="rounded-sm border-outline-variant text-primary focus:ring-primary-container h-4 w-4"
+                  id="terms"
+                  name="terms"
+                  required
                   type="checkbox"
                   checked={terms}
                   onChange={(e) => setTerms(e.target.checked)}
@@ -150,8 +159,8 @@ export default function SignupPage() {
               </label>
             </div>
             {/* Action Button */}
-            <button 
-              className="primary-gradient w-full py-4 rounded-full text-on-primary font-headline font-bold tracking-tight text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50" 
+            <button
+              className="primary-gradient w-full py-4 rounded-full text-on-primary font-headline font-bold tracking-tight text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
               type="submit"
               disabled={loading}
             >
@@ -162,7 +171,7 @@ export default function SignupPage() {
           {/* Footer / Redirect */}
           <footer className="mt-10 pt-8 border-t border-surface-container-high">
             <p className="text-sm text-center font-body text-secondary">
-              Already a guardian? 
+              Already a guardian?
               <Link className="text-primary font-bold hover:underline transition-all ml-1" href="/login">Log In</Link>
             </p>
           </footer>

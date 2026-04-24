@@ -60,7 +60,15 @@ export default function AddPetPage() {
   };
 
   if (authStatus === "loading") {
-    return <div className="h-screen w-screen bg-surface flex items-center justify-center text-on-surface">Authenticating...</div>;
+    return (
+      <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Guardian Registry</span>
+          <p className="text-secondary font-headline font-bold">Authenticating...</p>
+        </div>
+      </div>
+    );
   }
 
   if (authStatus === "unauthenticated") return null;
