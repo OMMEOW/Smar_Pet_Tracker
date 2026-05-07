@@ -4,7 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import { PetHistory } from "@/lib/models";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) {
@@ -12,8 +12,11 @@ export async function GET() {
     }
 
     const userId = (session.user as any).id;
+    const { searchParams } = new URL(request.url);
+    const petId = searchParams.get("petId") || "default_pet";
+
     await dbConnect();
-    const history = await PetHistory.find({ userId, petId: "default_pet" })
+    const history = await PetHistory.find({ userId, petId })
       .sort({ timestamp: -1 })
       .limit(50);
     return NextResponse.json(history);
@@ -33,10 +36,11 @@ export async function POST(request: Request) {
     const userId = (session.user as any).id;
     await dbConnect();
     const data = await request.json();
+    const petId = data.petId || "default_pet";
     
     const entry = await PetHistory.create({
       userId,
-      petId: "default_pet",
+      petId,
       ...data,
       timestamp: data.timestamp || Date.now(),
     });

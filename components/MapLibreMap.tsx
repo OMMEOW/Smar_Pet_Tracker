@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -28,6 +28,7 @@ export default function MapLibreMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const dogMarker = useRef<maplibregl.Marker | null>(null);
+  const lastAutoFitKey = useRef<string | null>(null);
 
   // Task 1 & 2: Helper to create GeoJSON circle with smooth 64 points
   const createGeoJSONCircle = (center: [number, number], radiusInMeters: number) => {
@@ -60,6 +61,16 @@ export default function MapLibreMap({
     if (!source) return;
 
     if (points.length < 3) {
+      if (geofence?.type === 'lasso' && geofence.coordinates?.length > 0) {
+        const closedPoints = [...geofence.coordinates, geofence.coordinates[0]];
+        source.setData({
+          type: "Feature",
+          geometry: { type: "Polygon", coordinates: [closedPoints] },
+          properties: {}
+        } as any);
+        return;
+      }
+
       source.setData({ type: 'FeatureCollection', features: [] });
       return;
     }
@@ -72,6 +83,33 @@ export default function MapLibreMap({
     } as any);
   };
 
+  const extendBoundsWithCircle = (
+    bounds: maplibregl.LngLatBounds,
+    circle: { lat: number; lng: number; radius: number }
+  ) => {
+    const radiusKm = circle.radius / 1000;
+    const lngOffset = radiusKm / (111.32 * Math.cos(circle.lat * Math.PI / 180));
+    const latOffset = radiusKm / 110.574;
+
+    bounds.extend([circle.lng - lngOffset, circle.lat - latOffset]);
+    bounds.extend([circle.lng + lngOffset, circle.lat + latOffset]);
+  };
+
+  const extendBoundsWithGeofence = (bounds: maplibregl.LngLatBounds) => {
+    if (!geofence) return;
+
+    if (geofence.type === "circle") {
+      extendBoundsWithCircle(bounds, geofence);
+      return;
+    }
+
+    if (geofence.type === "lasso" && geofence.coordinates?.length > 0) {
+      geofence.coordinates.forEach(([lng, lat]: [number, number]) => {
+        bounds.extend([lng, lat]);
+      });
+    }
+  };
+
   useEffect(() => {
     if (!mapContainer.current) return;
     if (map.current) return;
@@ -80,7 +118,7 @@ export default function MapLibreMap({
       container: mapContainer.current,
       style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
       center: [center[1], center[0]], 
-      zoom: 14,
+      zoom: 18,
     });
 
     map.current.on('load', () => {
@@ -184,6 +222,8 @@ export default function MapLibreMap({
 
   useEffect(() => {
     if (map.current) {
+      if (geofence && markerPosition) return;
+
       map.current.easeTo({
         center: [center[1], center[0]],
         duration: 1000,
@@ -191,6 +231,41 @@ export default function MapLibreMap({
       });
     }
   }, [center[0], center[1]]);
+
+  useEffect(() => {
+    if (!map.current || !markerPosition || !geofence) return;
+
+    const nextAutoFitKey =
+      geofence.type === "circle"
+        ? `${markerPosition[0].toFixed(6)},${markerPosition[1].toFixed(6)},circle,${geofence.lat.toFixed(6)},${geofence.lng.toFixed(6)}`
+        : `${markerPosition[0].toFixed(6)},${markerPosition[1].toFixed(6)},lasso,${JSON.stringify(geofence.coordinates || [])}`;
+
+    if (lastAutoFitKey.current === nextAutoFitKey) return;
+
+    const fitMapToLocationAndGeofence = () => {
+      if (!map.current) return;
+
+      const bounds = new maplibregl.LngLatBounds(
+        [markerPosition[1], markerPosition[0]],
+        [markerPosition[1], markerPosition[0]]
+      );
+
+      extendBoundsWithGeofence(bounds);
+
+      map.current.fitBounds(bounds, {
+        padding: { top: 70, bottom: 70, left: 70, right: 70 },
+        maxZoom: 20,
+        duration: 1000,
+      });
+      lastAutoFitKey.current = nextAutoFitKey;
+    };
+
+    if (map.current.loaded()) {
+      fitMapToLocationAndGeofence();
+    } else {
+      map.current.once("load", fitMapToLocationAndGeofence);
+    }
+  }, [markerPosition, geofence]);
 
   useEffect(() => {
     if (!map.current) return;
@@ -228,24 +303,21 @@ export default function MapLibreMap({
 
       circleSource.setData({ type: 'FeatureCollection', features: [] });
       
-      // If we are NOT drawing, show the saved geofence
       if (activeLassoPoints.length === 0) {
         lassoSource.setData({ type: 'FeatureCollection', features: [] });
       }
 
-      if (mode === 'circle') {
-        if (geofence?.type === 'circle') {
-          circleSource.setData(createGeoJSONCircle([geofence.lng, geofence.lat], geofence.radius) as any);
-        }
-      } else if (mode === 'lasso') {
-        if (activeLassoPoints.length === 0 && geofence?.type === 'lasso' && geofence.coordinates.length > 0) {
-          const closedPoints = [...geofence.coordinates, geofence.coordinates[0]];
-          lassoSource.setData({
-            type: "Feature",
-            geometry: { type: "Polygon", coordinates: [closedPoints] },
-            properties: {}
-          } as any);
-        }
+      if (geofence?.type === 'circle') {
+        circleSource.setData(createGeoJSONCircle([geofence.lng, geofence.lat], geofence.radius) as any);
+      }
+
+      if (activeLassoPoints.length === 0 && geofence?.type === 'lasso' && geofence.coordinates?.length > 0) {
+        const closedPoints = [...geofence.coordinates, geofence.coordinates[0]];
+        lassoSource.setData({
+          type: "Feature",
+          geometry: { type: "Polygon", coordinates: [closedPoints] },
+          properties: {}
+        } as any);
       }
     };
 

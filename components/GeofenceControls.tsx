@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 
+const MIN_GEOFENCE_RADIUS_METERS = 30;
+const MAX_GEOFENCE_RADIUS_METERS = 300;
+const DEFAULT_GEOFENCE_RADIUS_METERS = 100;
+
 export type Geofence = 
   | { type: "circle"; lat: number; lng: number; radius: number }
   | { type: "lasso"; coordinates: [number, number][] };
@@ -10,6 +14,7 @@ interface GeofenceControlsProps {
   mode: "circle" | "lasso";
   onModeChange: (mode: "circle" | "lasso") => void;
   initialGeofence: Geofence | null;
+  onPreview?: (geofence: Geofence) => void;
   onUpdate: (geofence: Geofence) => Promise<void>;
   activeLassoPoints: [number, number][];
   onLassoPointsChange: (points: [number, number][]) => void;
@@ -19,6 +24,7 @@ export function GeofenceControls({
   mode, 
   onModeChange, 
   initialGeofence, 
+  onPreview,
   onUpdate,
   activeLassoPoints,
   onLassoPointsChange
@@ -27,13 +33,25 @@ export function GeofenceControls({
     type: "circle",
     lat: 19.123456,
     lng: 72.987654,
-    radius: 100
+    radius: DEFAULT_GEOFENCE_RADIUS_METERS
   });
   const [saving, setSaving] = useState(false);
 
+  const clampRadius = (radius: number) =>
+    Math.min(Math.max(radius, MIN_GEOFENCE_RADIUS_METERS), MAX_GEOFENCE_RADIUS_METERS);
+
+  const normalizeGeofence = (nextGeofence: Geofence): Geofence => {
+    if (nextGeofence.type !== "circle") return nextGeofence;
+
+    return {
+      ...nextGeofence,
+      radius: clampRadius(nextGeofence.radius),
+    };
+  };
+
   useEffect(() => {
     if (initialGeofence) {
-      setGeofence(initialGeofence);
+      setGeofence(normalizeGeofence(initialGeofence));
     }
   }, [initialGeofence]);
 
@@ -44,6 +62,12 @@ export function GeofenceControls({
     } finally {
       setSaving(false);
     }
+  };
+
+  const updateGeofence = (nextGeofence: Geofence) => {
+    const normalizedGeofence = normalizeGeofence(nextGeofence);
+    setGeofence(normalizedGeofence);
+    onPreview?.(normalizedGeofence);
   };
 
   return (
@@ -89,12 +113,12 @@ export function GeofenceControls({
                     value={geofence.type === "circle" ? geofence.lat : ""}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value) || 0;
-                      setGeofence(prev => ({
+                      updateGeofence({
                         type: "circle",
                         lat: val,
-                        lng: prev.type === "circle" ? prev.lng : 0,
-                        radius: prev.type === "circle" ? prev.radius : 100
-                      }));
+                        lng: geofence.type === "circle" ? geofence.lng : 0,
+                        radius: geofence.type === "circle" ? geofence.radius : DEFAULT_GEOFENCE_RADIUS_METERS
+                      });
                     }}
                   />
                 </div>
@@ -108,12 +132,12 @@ export function GeofenceControls({
                     value={geofence.type === "circle" ? geofence.lng : ""}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value) || 0;
-                      setGeofence(prev => ({
+                      updateGeofence({
                         type: "circle",
-                        lat: prev.type === "circle" ? prev.lat : 0,
+                        lat: geofence.type === "circle" ? geofence.lat : 0,
                         lng: val,
-                        radius: prev.type === "circle" ? prev.radius : 100
-                      }));
+                        radius: geofence.type === "circle" ? geofence.radius : DEFAULT_GEOFENCE_RADIUS_METERS
+                      });
                     }}
                   />
                 </div>
@@ -127,23 +151,23 @@ export function GeofenceControls({
                 <input 
                   className="w-full h-1.5 bg-surface-container rounded-full appearance-none cursor-pointer accent-primary transition-all" 
                   type="range" 
-                  min="10"
-                  max="2000"
-                  step="10"
-                  value={geofence.type === "circle" ? geofence.radius : 100}
+                  min={MIN_GEOFENCE_RADIUS_METERS}
+                  max={MAX_GEOFENCE_RADIUS_METERS}
+                  step="1"
+                  value={geofence.type === "circle" ? geofence.radius : DEFAULT_GEOFENCE_RADIUS_METERS}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value) || 10;
-                    setGeofence(prev => ({
+                    const val = parseInt(e.target.value) || DEFAULT_GEOFENCE_RADIUS_METERS;
+                    updateGeofence({
                       type: "circle",
-                      lat: prev.type === "circle" ? prev.lat : 0,
-                      lng: prev.type === "circle" ? prev.lng : 0,
+                      lat: geofence.type === "circle" ? geofence.lat : 0,
+                      lng: geofence.type === "circle" ? geofence.lng : 0,
                       radius: val
-                    }));
+                    });
                   }}
                 />
                 <div className="flex justify-between mt-3 px-1">
-                  <span className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-tighter">10m</span>
-                  <span className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-tighter">2km</span>
+                  <span className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-tighter">30m</span>
+                  <span className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-tighter">300m</span>
                 </div>
               </div>
             </>
@@ -182,7 +206,7 @@ export function GeofenceControls({
               {activeLassoPoints.length >= 3 && (
                 <button 
                   onClick={() => {
-                    setGeofence({ type: "lasso", coordinates: activeLassoPoints });
+                    updateGeofence({ type: "lasso", coordinates: activeLassoPoints });
                     onLassoPointsChange([]);
                   }}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-primary/10 text-primary rounded-xl font-bold text-sm hover:bg-primary/20 transition-all border border-primary/20"

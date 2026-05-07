@@ -3,7 +3,16 @@
 import { useMemo } from "react";
 
 interface StatusCardProps {
-  location: { latitude: number; longitude: number; timestamp: number } | null;
+  location: {
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+    satellites?: number;
+    hdop?: number;
+    distance?: number;
+    pulseBpm?: number;
+    pulseRaw?: number;
+  } | null;
   alert: boolean;
   petName?: string;
 }
@@ -34,13 +43,46 @@ export function StatusCard({ location, alert, petName = "Apollo" }: StatusCardPr
         <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
           <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Latitude</p>
           <p className="font-headline font-semibold text-sm text-on-surface">
-            {location ? `${location.latitude.toFixed(4)}° N` : "---"}
+            {location ? location.latitude.toFixed(6) : "---"}
           </p>
         </div>
         <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
           <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Longitude</p>
           <p className="font-headline font-semibold text-sm text-on-surface">
-            {location ? `${location.longitude.toFixed(4)}° W` : "---"}
+            {location ? location.longitude.toFixed(6) : "---"}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
+          <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Pulse</p>
+          <p className="font-headline font-semibold text-sm text-on-surface">
+            {typeof location?.pulseBpm === "number" && location.pulseBpm > 0 ? `${location.pulseBpm} bpm` : "---"}
+          </p>
+        </div>
+        <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
+          <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Distance</p>
+          <p className="font-headline font-semibold text-sm text-on-surface">
+            {typeof location?.distance === "number" ? `${location.distance.toFixed(1)}m` : "---"}
+          </p>
+        </div>
+        <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
+          <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Sats</p>
+          <p className="font-headline font-semibold text-sm text-on-surface">
+            {typeof location?.satellites === "number" ? location.satellites : "---"}
+          </p>
+        </div>
+        <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
+          <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">HDOP</p>
+          <p className="font-headline font-semibold text-sm text-on-surface">
+            {typeof location?.hdop === "number" ? location.hdop.toFixed(2) : "---"}
+          </p>
+        </div>
+        <div className="bg-surface-container-lowest/50 dark:bg-on-surface/5 p-3 rounded-2xl border border-outline-variant/5">
+          <p className="text-[9px] font-bold uppercase text-secondary tracking-wider mb-1">Pulse Raw</p>
+          <p className="font-headline font-semibold text-sm text-on-surface">
+            {typeof location?.pulseRaw === "number" ? location.pulseRaw : "---"}
           </p>
         </div>
       </div>

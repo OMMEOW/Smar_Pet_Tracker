@@ -1,20 +1,24 @@
 import mongoose, { Schema, model, models } from "mongoose";
 
-// Geofence Schema
 const GeofenceSchema = new Schema({
-  lat: { type: Number, required: true, default: 19.123456 },
-  lng: { type: Number, required: true, default: 72.987654 },
-  radius: { type: Number, required: true, default: 100 },
+  type: { type: String, enum: ["circle", "lasso"], default: "circle" },
+  lat: { type: Number, default: 18.989899 },
+  lng: { type: Number, default: 73.109232 },
+  radius: { type: Number, default: 100 },
+  coordinates: { type: [[Number]], default: undefined },
 });
 
-// Location Schema (Current)
 const LocationSchema = new Schema({
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   timestamp: { type: Number, required: true },
+  satellites: { type: Number },
+  hdop: { type: Number },
+  distance: { type: Number },
+  pulseBpm: { type: Number },
+  pulseRaw: { type: Number },
 });
 
-// Pet Status Schema
 const PetStatusSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   petId: { type: String, required: true },
@@ -27,15 +31,27 @@ const PetStatusSchema = new Schema({
   location: { type: LocationSchema },
   geofence: { type: GeofenceSchema },
   alert: { type: Boolean, default: false },
+  deviceStatus: { type: String, enum: ["inside", "outside", "unknown"], default: "unknown" },
 });
 
-// Pet History Schema
 const PetHistorySchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   petId: { type: String, default: "default_pet" },
   latitude: { type: Number, required: true },
   longitude: { type: Number, required: true },
   timestamp: { type: Number, required: true, index: true },
+  satellites: { type: Number },
+  hdop: { type: Number },
+  distance: { type: Number },
+  pulseBpm: { type: Number },
+  pulseRaw: { type: Number },
+  alert: { type: Boolean, default: false },
+});
+
+const DeviceNonceSchema = new Schema({
+  nonce: { type: String, required: true, unique: true },
+  deviceId: { type: String, required: true, index: true },
+  createdAt: { type: Date, default: Date.now, expires: 600 },
 });
 
 // User Schema
@@ -49,4 +65,5 @@ const UserSchema = new Schema({
 });
 export const PetStatus = models.PetStatus || model("PetStatus", PetStatusSchema);
 export const PetHistory = models.PetHistory || model("PetHistory", PetHistorySchema);
+export const DeviceNonce = models.DeviceNonce || model("DeviceNonce", DeviceNonceSchema);
 export const User = models.User || model("User", UserSchema);
