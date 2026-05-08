@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import dbConnect from "@/lib/mongodb";
-import { GPSLocation, PetStatus } from "@/lib/models";
+import { GPSHistory, PetStatus } from "@/lib/models";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { evaluatePetFenceStatus } from "@/lib/geofenceUtils";
 
@@ -14,9 +14,9 @@ export async function GET() {
 
     await dbConnect();
 
-    // Fetch the latest entry for each device from gpslocations
+    // Fetch the latest entry for each device from GPSHistorys
     // We'll use aggregation to get the most recent document per deviceId
-    const latestGpsData = await GPSLocation.aggregate([
+    const latestGpsData = await GPSHistory.aggregate([
       { $sort: { timestamp: -1 } },
       {
         $group: {
@@ -39,15 +39,15 @@ export async function GET() {
       // and trigger the Telegram alert engine
       await PetStatus.updateOne(
         { petId: item._id },
-        { 
-          $set: { 
+        {
+          $set: {
             "location.latitude": item.latitude,
             "location.longitude": item.longitude,
             "location.timestamp": item.timestamp.getTime(),
             battery: item.battery || 100,
             isOnline: isOnline,
             lastSeen: item.timestamp
-          } 
+          }
         }
       );
 
@@ -69,7 +69,7 @@ export async function GET() {
     }
 
     console.log(`[GPS API] Synced ${formattedData.length} devices and processed backend alerts.`);
-    
+
     return NextResponse.json(formattedData);
   } catch (error: any) {
     console.error("GPS API Error:", error);

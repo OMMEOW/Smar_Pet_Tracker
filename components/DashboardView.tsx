@@ -14,6 +14,29 @@ import { Skeleton } from "boneyard-js/react";
 import { isPointInsideGeofence } from "@/lib/geofenceLogic";
 import useSWR, { mutate } from "swr";
 
+interface Pet {
+  petId: string;
+  name: string;
+  deviceId: string;
+  species: string;
+  breed: string;
+  imageUrl?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    timestamp: number;
+  };
+  pulseBpm?: number;
+  pulseRaw?: number;
+  isOnline: boolean;
+  lastSeen: any;
+  geofence?: {
+    coordinates: [number, number][];
+  };
+  alert: boolean;
+  [key: string]: any;
+}
+
 const MapLibreMap = dynamic(() => import("@/components/MapLibreMap"), {
   ssr: false,
   loading: () => (
@@ -59,7 +82,7 @@ export default function DashboardView() {
   };
 
   // Merge static and live data
-  const pets = useMemo(() => {
+  const pets = useMemo<Pet[]>(() => {
     if (!staticPets) return [];
     return staticPets.map((pet: any) => {
       const telemetry = liveTelemetry?.find((t: any) => t.deviceId?.toLowerCase() === pet.deviceId?.toLowerCase());
@@ -94,8 +117,8 @@ export default function DashboardView() {
     }
   }, [pets, activePetId]);
 
-  const activePet = useMemo(() => pets.find(p => p.petId === activePetId) || null, [pets, activePetId]);
-  const globalBreach = useMemo(() => pets.find(p => p.alert === true), [pets]);
+  const activePet = useMemo(() => pets.find((p: Pet) => p.petId === activePetId) || null, [pets, activePetId]);
+  const globalBreach = useMemo(() => pets.find((p: Pet) => p.alert === true), [pets]);
 
   const handleUpdateGeofence = async (coords: [number, number][]) => {
     if (!activePetId) return;
@@ -173,7 +196,7 @@ export default function DashboardView() {
             <div className="lg:col-span-2 flex flex-col gap-6">
               {pets.length > 0 && (
                  <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                   {pets.map(p => (
+                   {pets.map((p: Pet) => (
                       <button 
                         key={p.petId}
                         onClick={() => setActivePetId(p.petId)}

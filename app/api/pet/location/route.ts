@@ -5,25 +5,51 @@ import { evaluatePetFenceStatus } from "@/lib/geofenceUtils";
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
-
-    const { deviceId, lat, lng, battery, timestamp } = data;
-
-    if (!deviceId || lat == null || lng == null) {
-      return NextResponse.json({ error: "Missing deviceId or coordinates" }, { status: 400 });
-    }
-
     await dbConnect();
 
-    // Find the pet by deviceId (petId)
-    const pet = await PetStatus.findOne({ petId: deviceId });
-    if (!pet) {
-      return NextResponse.json({ error: "Device not registered" }, { status: 404 });
+    const data = await request.json();
+
+    const {
+      deviceId,
+      lat,
+      lng,
+      battery,
+      timestamp
+    } = data;
+
+    // Validate required fields
+    if (!deviceId || lat == null || lng == null) {
+      return NextResponse.json(
+        {
+          error: "Missing deviceId or coordinates"
+        },
+        {
+          status: 400
+        }
+      );
     }
 
-    // Update the pet status without triggering strict schema validation on legacy docs
+    // Find pet linked to device
+    const pet = await PetStatus.findOne({
+      petId: deviceId
+    });
+
+    if (!pet) {
+      return NextResponse.json(
+        {
+          error: "Device not registered"
+        },
+        {
+          status: 404
+        }
+      );
+    }
+
+    // Update live pet status
     await PetStatus.updateOne(
-      { _id: pet._id },
+      {
+        _id: pet._id
+      },
       {
         $set: {
           location: {
@@ -31,14 +57,20 @@ export async function POST(request: Request) {
             longitude: lng,
             timestamp: timestamp || Date.now()
           },
-          ...(battery !== undefined ? { battery } : {}),
+
+          ...(battery !== undefined
+            ? {
+              battery
+            }
+            : {}),
+
           lastSeen: Date.now(),
           isOnline: true
         }
       }
     );
 
-    // Log the location in history if userId is valid
+    // Store GPS history
     if (pet.userId) {
       await PetHistory.create({
         userId: pet.userId,
@@ -47,14 +79,33 @@ export async function POST(request: Request) {
         longitude: lng,
         timestamp: timestamp || Date.now()
       });
-
-      // TRIGGER CENTRALIZED GEOFENCE BREACH DETECTION
-      await evaluatePetFenceStatus(deviceId);
     }
 
-    return NextResponse.json({ success: true, message: "Location updated" });
-  } catch (error) {
-    console.error("API Error (Location Update):", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error", stack: error.stack }, { status: 500 });
+    // Run geofence evaluation
+    await evaluatePetFenceStatus(deviceId);
+
+    return NextResponse.json({
+      success: true,
+      message: "Location updated successfully"
+    });
+
+  } catch (error: any) {
+    console.error(
+      "API Error (Location Update):",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          error?.message ||
+          "Internal Server Error",
+
+        stack: error?.stack
+      },
+      {
+        status: 500
+      }
+    );
   }
 }
