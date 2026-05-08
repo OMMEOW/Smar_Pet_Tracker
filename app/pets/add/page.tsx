@@ -12,21 +12,49 @@ export default function AddPetPage() {
   const router = useRouter();
   
   const [petName, setPetName] = useState("");
+  const [trackerId, setTrackerId] = useState("");
   const [petType, setPetType] = useState("Dog");
   const [breed, setBreed] = useState("");
   const [age, setAge] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [availableTrackers, setAvailableTrackers] = useState<string[]>([]);
+  const [isScanning, setIsScanning] = useState(true);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.push("/login");
+      return;
     }
-  }, [authStatus, router]);
+    
+    if (authStatus === "authenticated") {
+      const scanForTrackers = async () => {
+        try {
+          const res = await fetch("/api/pet/all");
+          if (res.ok) {
+            const data = await res.json();
+            const trackers = data.map((pet: any) => pet.petId);
+            setAvailableTrackers(trackers);
+            if (trackers.length > 0 && !trackerId) {
+              setTrackerId(trackers[0]);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to scan trackers", err);
+        } finally {
+          setIsScanning(false);
+        }
+      };
+      
+      scanForTrackers();
+      const intervalId = setInterval(scanForTrackers, 5000);
+      return () => clearInterval(intervalId);
+    }
+  }, [authStatus, router, trackerId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!petName || !breed) {
+    if (!petName || !breed || !trackerId) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -39,7 +67,7 @@ export default function AddPetPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          petId: petName.toLowerCase().replace(/\s+/g, "-"),
+          petId: trackerId,
           name: petName,
           species: petType,
           breed,
@@ -184,6 +212,40 @@ export default function AddPetPage() {
                           </button>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-8">
+                    <div className="space-y-2">
+                      <label className="font-semibold text-secondary text-xs uppercase tracking-widest font-label flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm">radar</span> Detected ESP32 Trackers
+                      </label>
+                      
+                      {isScanning && availableTrackers.length === 0 ? (
+                        <div className="w-full bg-surface-container-low rounded-xl p-4 flex items-center gap-3">
+                          <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                          <span className="text-sm font-headline text-secondary">Scanning for active collars nearby...</span>
+                        </div>
+                      ) : availableTrackers.length === 0 ? (
+                        <div className="w-full bg-surface-container-low border border-warning/20 rounded-xl p-4 flex flex-col gap-1">
+                          <span className="text-sm font-headline font-bold text-warning">No trackers found</span>
+                          <span className="text-xs font-label text-secondary">Please power on your ESP32 collar. It will appear here automatically.</span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <select 
+                            className="w-full bg-surface-container-low border-2 border-transparent focus:border-primary px-4 py-3 rounded-xl text-lg font-headline font-bold outline-none transition-colors appearance-none cursor-pointer" 
+                            value={trackerId}
+                            onChange={(e) => setTrackerId(e.target.value)}
+                          >
+                            {availableTrackers.map((id) => (
+                              <option key={id} value={id}>Tracker ID: {id}</option>
+                            ))}
+                          </select>
+                          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-secondary">expand_more</span>
+                        </div>
+                      )}
+                      <p className="text-xs text-secondary/60 mt-1 font-label">Select your powered-on ESP32 tracker from the list.</p>
                     </div>
                   </div>
 

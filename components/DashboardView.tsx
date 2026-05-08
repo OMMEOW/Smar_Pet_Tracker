@@ -76,10 +76,7 @@ export default function DashboardView() {
   const geofenceSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const localGeofenceEditUntil = useRef(0);
 
-  const liveCircleGeofence =
-    location && geofence?.type === "circle"
-      ? { ...geofence, lat: location.latitude, lng: location.longitude }
-      : geofence;
+  const liveCircleGeofence = geofence;
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
@@ -153,11 +150,9 @@ export default function DashboardView() {
   }, [authStatus, selectedPetId]);
 
   const normalizeLiveCircle = (newGeo: Geofence): Geofence => {
-    if (newGeo.type !== "circle" || !location) return newGeo;
+    if (newGeo.type !== "circle") return newGeo;
     return {
       ...newGeo,
-      lat: location.latitude,
-      lng: location.longitude,
       radius: clampGeofenceRadius(newGeo.radius),
     };
   };

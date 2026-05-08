@@ -5,6 +5,7 @@
 #include <time.h>
 #include <esp_system.h>
 #include <mbedtls/md.h>
+#include <mbedtls/aes.h>
 
 #define GPS_RX_PIN 16
 #define GPS_TX_PIN 17
@@ -20,7 +21,8 @@ const char* WIFI_PASSWORD = "";
 // Example: http://192.168.1.10:3000/api/device/location
 const char* SERVER_URL = "http://10.242.171.95:3000/api/device/location";
 const char* DEVICE_SHARED_SECRET = "c43ca0a65e0f809a7014b3d7d2042b0346591f53f50041276576a1aa9eb36f13";
-const char* DEVICE_PET_ID = "default_pet";
+
+String dynamicPetId = "";
 
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(2);
@@ -107,6 +109,61 @@ String hmacSha256Hex(const String& message) {
   return hex;
 }
 
+void hexStringToBytes(const char* hexStr, byte* bytes) {
+  size_t len = strlen(hexStr);
+  for (size_t i = 0; i < len; i += 2) {
+    char byteChars[3] = { hexStr[i], hexStr[i + 1], '\0' };
+    bytes[i / 2] = (byte)strtol(byteChars, nullptr, 16);
+  }
+}
+
+String encryptAesHex(const String& payload, String& outIvHex) {
+  mbedtls_aes_context aes;
+  mbedtls_aes_init(&aes);
+
+  byte key[32];
+  hexStringToBytes(DEVICE_SHARED_SECRET, key);
+  mbedtls_aes_setkey_enc(&aes, key, 256);
+
+  byte iv[16];
+  for (int i = 0; i < 16; i++) {
+    iv[i] = esp_random() & 0xFF;
+  }
+  
+  const char hexChars[] = "0123456789abcdef";
+  outIvHex = "";
+  for (int i = 0; i < 16; i++) {
+    outIvHex += hexChars[iv[i] >> 4];
+    outIvHex += hexChars[iv[i] & 0x0f];
+  }
+
+  size_t payloadLen = payload.length();
+  size_t paddedLen = payloadLen + (16 - (payloadLen % 16));
+  byte paddingValue = 16 - (payloadLen % 16);
+
+  byte* inputBuffer = (byte*)malloc(paddedLen);
+  byte* outputBuffer = (byte*)malloc(paddedLen);
+  
+  memcpy(inputBuffer, payload.c_str(), payloadLen);
+  for (size_t i = payloadLen; i < paddedLen; i++) {
+    inputBuffer[i] = paddingValue;
+  }
+
+  mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, paddedLen, iv, inputBuffer, outputBuffer);
+
+  String hexOutput = "";
+  for (size_t i = 0; i < paddedLen; i++) {
+    hexOutput += hexChars[outputBuffer[i] >> 4];
+    hexOutput += hexChars[outputBuffer[i] & 0x0f];
+  }
+
+  free(inputBuffer);
+  free(outputBuffer);
+  mbedtls_aes_free(&aes);
+
+  return hexOutput;
+}
+
 void updatePulseSensor() {
   if (millis() - lastPulseSampleMs < 20) return;
   lastPulseSampleMs = millis();
@@ -135,8 +192,15 @@ void setup() {
   gpsSerial.begin(GPS_BAUD, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
   connectWiFi();
   syncClock();
+  
+  String mac = WiFi.macAddress();
+  mac.replace(":", "");
+  dynamicPetId = "ESP_" + mac;
+  
   Serial.print("Server URL: ");
   Serial.println(SERVER_URL);
+  Serial.print("Device ID: ");
+  Serial.println(dynamicPetId);
   Serial.println("GPS and pulse web tracker active");
 }
 
@@ -176,7 +240,7 @@ void sendLocation() {
   unsigned long timestamp = static_cast<unsigned long>(time(nullptr));
 
   String payload = "{";
-  payload += "\"petId\":\"" + String(DEVICE_PET_ID) + "\",";
+  payload += "\"petId\":\"" + dynamicPetId + "\",";
   payload += "\"latitude\":" + String(currentLat, 6) + ",";
   payload += "\"longitude\":" + String(currentLon, 6) + ",";
   payload += "\"satellites\":" + String(satellites) + ",";
@@ -185,19 +249,23 @@ void sendLocation() {
   payload += "\"pulseRaw\":" + String(safePulseRaw);
   payload += "}";
 
+  String ivHex;
+  String encryptedPayload = encryptAesHex(payload, ivHex);
+
   String nonce = randomNonce();
   String timestampText = String(timestamp);
-  String signature = hmacSha256Hex(timestampText + "." + nonce + "." + payload);
+  String signature = hmacSha256Hex(timestampText + "." + nonce + "." + encryptedPayload);
 
   HTTPClient http;
   http.begin(SERVER_URL);
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("x-device-id", DEVICE_PET_ID);
+  http.addHeader("Content-Type", "text/plain");
+  http.addHeader("x-device-id", dynamicPetId);
   http.addHeader("x-device-timestamp", timestampText);
   http.addHeader("x-device-nonce", nonce);
   http.addHeader("x-device-signature", signature);
+  http.addHeader("x-device-iv", ivHex);
 
-  int statusCode = http.POST(payload);
+  int statusCode = http.POST(encryptedPayload);
   String response = http.getString();
   http.end();
 

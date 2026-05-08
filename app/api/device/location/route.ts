@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual, createDecipheriv } from "crypto";
 import dbConnect from "@/lib/mongodb";
 import { DeviceNonce, PetHistory, PetStatus, User } from "@/lib/models";
 
@@ -37,6 +37,15 @@ function isFiniteInRange(value: number, min: number, max: number) {
   return Number.isFinite(value) && value >= min && value <= max;
 }
 
+function decryptAes(ciphertextHex: string, keyHex: string, ivHex: string): string {
+  const key = Buffer.from(keyHex, "hex");
+  const iv = Buffer.from(ivHex, "hex");
+  const decipher = createDecipheriv("aes-256-cbc", key, iv);
+  let decrypted = decipher.update(ciphertextHex, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
 export async function POST(request: Request) {
   try {
     const configuredKey = process.env.DEVICE_API_KEY;
@@ -45,6 +54,7 @@ export async function POST(request: Request) {
     const timestampHeader = request.headers.get("x-device-timestamp") || "";
     const nonce = request.headers.get("x-device-nonce") || "";
     const signature = request.headers.get("x-device-signature") || "";
+    const ivHeader = request.headers.get("x-device-iv") || "";
 
     if (!configuredKey || !ownerEmail) {
       return NextResponse.json(
@@ -57,8 +67,8 @@ export async function POST(request: Request) {
     const timestamp = Number(timestampHeader);
     const requestAgeMs = Math.abs(Date.now() - timestamp * 1000);
 
-    if (!deviceId || !timestamp || !nonce || !signature) {
-      return NextResponse.json({ error: "Missing signed device headers" }, { status: 401 });
+    if (!deviceId || !timestamp || !nonce || !signature || !ivHeader) {
+      return NextResponse.json({ error: "Missing signed device headers or IV" }, { status: 401 });
     }
 
     if (requestAgeMs > REQUEST_MAX_AGE_MS) {
@@ -82,7 +92,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Replay detected" }, { status: 409 });
     }
 
-    const body = JSON.parse(rawBody);
+    let decryptedBody;
+    try {
+      decryptedBody = decryptAes(rawBody, configuredKey, ivHeader);
+    } catch (err) {
+      return NextResponse.json({ error: "AES Decryption failed" }, { status: 400 });
+    }
+
+    const body = JSON.parse(decryptedBody);
     const latitude = Number(body.latitude);
     const longitude = Number(body.longitude);
 
@@ -136,15 +153,22 @@ export async function POST(request: Request) {
       }
     }
 
-    const configuredRadius = Number(existingStatus?.geofence?.radius);
-    const geofence = {
-      type: "circle",
-      lat: latitude,
-      lng: longitude,
-      radius: isFiniteInRange(configuredRadius, MIN_GEOFENCE_RADIUS_METERS, MAX_GEOFENCE_RADIUS_METERS)
+    let geofence = existingStatus?.geofence;
+    
+    // Set initial geofence to the pet's first reported location if one doesn't exist yet
+    if (!geofence || (geofence.type === "circle" && (!Number.isFinite(geofence.lat) || !Number.isFinite(geofence.lng)))) {
+      geofence = {
+        type: "circle",
+        lat: latitude,
+        lng: longitude,
+        radius: DEFAULT_GEOFENCE_RADIUS_METERS,
+      };
+    } else if (geofence.type === "circle") {
+      const configuredRadius = Number(geofence.radius);
+      geofence.radius = isFiniteInRange(configuredRadius, MIN_GEOFENCE_RADIUS_METERS, MAX_GEOFENCE_RADIUS_METERS)
         ? configuredRadius
-        : DEFAULT_GEOFENCE_RADIUS_METERS,
-    };
+        : DEFAULT_GEOFENCE_RADIUS_METERS;
+    }
 
     const distance =
       geofence?.type === "circle" && Number.isFinite(geofence.lat) && Number.isFinite(geofence.lng)
