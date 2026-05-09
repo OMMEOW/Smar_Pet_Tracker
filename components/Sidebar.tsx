@@ -4,20 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { memo } from "react";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function Sidebar() {
+export const Sidebar = memo(function Sidebar() {
   const pathname = usePathname();
 
   const navItems = [
     { href: "/", icon: "dashboard", label: "Dashboard" },
     { href: "/pets", icon: "pets", label: "My Pets" },
     { href: "/history", icon: "monitoring", label: "Activity" },
-    { href: "/settings", icon: "radar", label: "Safe Zones" },
-    { href: "/profile", icon: "person", label: "Profile" },
+    { href: "/settings", icon: "settings", label: "Settings" },
   ];
 
   return (
@@ -70,4 +70,4 @@ export function Sidebar() {
       </div>
     </aside>
   );
-}
+});

@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
 
 interface HistoryEntry {
+  petId: string;
   latitude: number;
   longitude: number;
   timestamp: number;
@@ -17,6 +18,9 @@ import { useRouter } from "next/navigation";
 export default function HistoryPage() {
   const { status: authStatus } = useSession();
   const router = useRouter();
+  
+  const [pets, setPets] = useState<any[]>([]);
+  const [activePetId, setActivePetId] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,22 +33,35 @@ export default function HistoryPage() {
   useEffect(() => {
     if (authStatus !== "authenticated") return;
 
-    const fetchHistory = async () => {
+    let isMounted = true;
+
+    const fetchPetsAndHistory = async () => {
       try {
-        const res = await fetch("/api/pet/history");
-        if (res.status === 401) {
+        const petRes = await fetch("/api/pet/all");
+        if (petRes.status === 401) {
           signOut({ callbackUrl: "/?logout=true" });
           return;
         }
-        const data = await res.json();
-        if (Array.isArray(data)) setHistory(data);
-        setLoading(false);
+        const petData = await petRes.json();
+        
+        if (isMounted && Array.isArray(petData)) {
+          setPets(petData);
+          const defaultPetId = activePetId || (petData.length > 0 ? petData[0].petId : null);
+          if (!activePetId && defaultPetId) setActivePetId(defaultPetId);
+
+          const url = defaultPetId ? `/api/pet/history?petId=${defaultPetId}` : "/api/pet/history";
+          const histRes = await fetch(url);
+          const histData = await histRes.json();
+          if (isMounted && Array.isArray(histData)) setHistory(histData);
+        }
+        if (isMounted) setLoading(false);
       } catch (err) {
         console.error("fetch error:", err);
+        if (isMounted) setLoading(false);
       }
     };
-    fetchHistory();
-  }, [authStatus]);
+    fetchPetsAndHistory();
+  }, [authStatus, activePetId]);
 
   if (authStatus === "loading") {
     return (
@@ -74,10 +91,31 @@ export default function HistoryPage() {
               <h1 className="font-headline text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-on-surface">Location History</h1>
               <p className="text-secondary mt-2 font-medium">Tracking the kinetic journey of your companion.</p>
             </header>
+            
+            {pets.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-6 mb-4 custom-scrollbar">
+                {pets.map(p => (
+                  <button 
+                    key={p.petId}
+                    onClick={() => setActivePetId(p.petId)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all whitespace-nowrap border ${p.petId === activePetId ? 'bg-primary text-white border-primary shadow-md' : 'bg-surface-container-high text-secondary border-outline-variant/20 hover:bg-surface-container-highest'}`}
+                  >
+                    <img src={p.imageUrl || '/dog.png'} className="w-6 h-6 rounded-full object-cover" />
+                    <span className="font-bold text-sm">{p.name || 'Unknown'}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {loading ? (
               <div className="flex items-center justify-center p-20">
                 <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              </div>
+            ) : history.length === 0 ? (
+              <div className="bg-surface-container-lowest rounded-3xl p-16 text-center shadow-sm border border-outline-variant/10">
+                <span className="material-symbols-outlined text-4xl text-secondary mb-4 opacity-50">history</span>
+                <h3 className="font-headline font-bold text-xl mb-2 text-on-surface">No History Found</h3>
+                <p className="text-secondary text-sm max-w-md mx-auto">No location data has been recorded for this pet yet.</p>
               </div>
             ) : (
               <div className="relative pl-8 border-l border-outline-variant/30 space-y-8">
@@ -87,7 +125,7 @@ export default function HistoryPage() {
                     <div className="bg-surface-container-lowest dark:bg-inverse-surface p-6 rounded-3xl shadow-sm border border-outline-variant/10 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm font-headline font-bold text-on-surface">
-                          {new Date(entry.timestamp).toLocaleString()}
+                          {new Date(entry.timestamp).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
                         </span>
                         {i === 0 && <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-lg uppercase">Latest</span>}
                       </div>
@@ -98,7 +136,6 @@ export default function HistoryPage() {
                             {entry.latitude.toFixed(6)}, {entry.longitude.toFixed(6)}
                           </p>
                         </div>
-
                       </div>
                     </div>
                   </div>

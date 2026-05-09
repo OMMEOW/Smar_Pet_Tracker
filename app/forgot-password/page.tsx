@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
                 Guardian Email
               </label>
               <input
-                className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-0 focus:border-primary transition-all font-medium outline-none text-lg"
+                className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant focus:ring-0 focus:border-primary transition-all font-medium outline-none text-lg"
                 placeholder="name@agency.com"
                 required
                 type="email"

@@ -8,7 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
 import { Skeleton } from "boneyard-js/react";
-import type { Geofence } from "@/components/DashboardView";
+import type { Geofence } from "@/lib/geofenceLogic";
 
 const MapLibreMap = dynamic(() => import("@/components/MapLibreMap"), {
   ssr: false,
@@ -53,7 +53,7 @@ export default function PetDetailsPage({ params }: { params: Promise<{ id: strin
   useEffect(() => {
     if (authStatus !== "authenticated") return;
     fetchPet();
-    const interval = setInterval(fetchPet, 5000);
+    const interval = setInterval(fetchPet, 2000);
     return () => clearInterval(interval);
   }, [authStatus, id]);
 
@@ -131,7 +131,7 @@ export default function PetDetailsPage({ params }: { params: Promise<{ id: strin
                       <input 
                         type="text" 
                         value={editForm?.name || ""} 
-                        onChange={e => setEditForm({...editForm, name: e.target.value})}
+                        onChange={e => setEditForm({...editForm, name: e.target.value.replace(/\b\w/g, l => l.toUpperCase())})}
                         className="w-full bg-surface-container-high rounded-2xl px-5 py-4 border-none focus:ring-2 focus:ring-primary font-headline font-bold text-on-surface transition-all"
                       />
                     </div>
@@ -148,21 +148,51 @@ export default function PetDetailsPage({ params }: { params: Promise<{ id: strin
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Species</label>
-                      <input 
-                        type="text" 
-                        value={editForm?.species || ""} 
+                      <select 
+                        value={editForm?.species || "Dog"} 
                         onChange={e => setEditForm({...editForm, species: e.target.value})}
-                        className="w-full bg-surface-container-high rounded-2xl px-5 py-4 border-none focus:ring-2 focus:ring-primary font-headline font-bold text-on-surface transition-all"
-                      />
+                        className="w-full bg-surface-container-high rounded-2xl px-5 py-4 border-none focus:ring-2 focus:ring-primary font-headline font-bold text-on-surface transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Dog">Dog</option>
+                        <option value="Cat">Cat</option>
+                        <option value="Other">Other</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Breed</label>
-                      <input 
-                        type="text" 
+                      <select 
                         value={editForm?.breed || ""} 
                         onChange={e => setEditForm({...editForm, breed: e.target.value})}
-                        className="w-full bg-surface-container-high rounded-2xl px-5 py-4 border-none focus:ring-2 focus:ring-primary font-headline font-bold text-on-surface transition-all"
-                      />
+                        className="w-full bg-surface-container-high rounded-2xl px-5 py-4 border-none focus:ring-2 focus:ring-primary font-headline font-bold text-on-surface transition-all appearance-none cursor-pointer"
+                      >
+                        {editForm?.species === "Dog" && (
+                          <>
+                            <option value="Indie (Desi Dog)">Indie (Desi Dog)</option>
+                            <option value="Labrador Retriever">Labrador Retriever</option>
+                            <option value="Golden Retriever">Golden Retriever</option>
+                            <option value="German Shepherd">German Shepherd</option>
+                            <option value="Beagle">Beagle</option>
+                            <option value="Pug">Pug</option>
+                            <option value="Shih Tzu">Shih Tzu</option>
+                            <option value="Rottweiler">Rottweiler</option>
+                            <option value="Doberman">Doberman</option>
+                            <option value="Husky">Husky</option>
+                          </>
+                        )}
+                        {editForm?.species === "Cat" && (
+                          <>
+                            <option value="Indian Billi">Indian Billi</option>
+                            <option value="Persian">Persian</option>
+                            <option value="Siamese">Siamese</option>
+                            <option value="Maine Coon">Maine Coon</option>
+                            <option value="Bengal">Bengal</option>
+                          </>
+                        )}
+                        {editForm?.species === "Other" && (
+                          <option value="Mixed Breed">Mixed Breed</option>
+                        )}
+                        <option value="Other">Other / Not Listed</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-primary tracking-widest ml-1">Age</label>
@@ -240,7 +270,7 @@ export default function PetDetailsPage({ params }: { params: Promise<{ id: strin
                       <img 
                         alt={pet?.name} 
                         className="w-full h-full object-cover" 
-                        src={pet?.imageUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuBkEFufOIxlqQakA4gWGx1HVzJJCp3UsFCnbBKzTxp3Fw2-JDJt37LVpDM0gltMYKBfl_E4TvWgYpBol9CDkYM4R9AWBq0acw7qHknL5YbV56kaZ0iDYWP4USuO0iBFIgZBanZdeJBW8UWveeP2EddizjtCbL_Hlk-dNzsV2NU5GyG9DkrE18ULaW_l26LDwv6EBFwYzJXqIOJIcsnGW-ooEXd7EYFReDAgUU_Lc8obm6KjxBharFsWCd_eFIywWo4Z2H9Dp5ZOt0A"} 
+                        src={pet?.imageUrl || (pet?.species?.toLowerCase() === 'cat' ? '/cat.png' : '/dog.png')} 
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-y-6 gap-x-4">
@@ -309,13 +339,12 @@ export default function PetDetailsPage({ params }: { params: Promise<{ id: strin
                   <div className="relative h-[500px] bg-surface-container-low m-4 rounded-[2rem] overflow-hidden group border border-outline-variant/10 shadow-inner">
                     <MapLibreMap 
                         center={pet?.location ? [pet.location.latitude, pet.location.longitude] : [19.076, 72.8777]}
-                        markerPosition={pet?.location ? [pet.location.latitude, pet.location.longitude] : null}
-                        geofence={pet?.geofence}
-                        mode="circle"
+                        pets={pet ? [pet] : []}
+                        activePetId={pet?.petId}
+                        geofenceCoordinates={pet?.geofence?.coordinates}
                         activeLassoPoints={[]}
                         onLassoPointsChange={() => {}}
                         onLassoFinish={() => {}}
-                        petImageUrl={pet?.imageUrl}
                     />
                   </div>
 

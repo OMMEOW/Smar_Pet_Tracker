@@ -86,7 +86,7 @@ function ResetPasswordForm() {
             </label>
             <div className="relative">
               <input
-                className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-0 focus:border-primary transition-all font-medium outline-none text-lg"
+                className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant focus:ring-0 focus:border-primary transition-all font-medium outline-none text-lg"
                 placeholder="••••••••"
                 required
                 type={showPassword ? "text" : "password"}
@@ -96,7 +96,7 @@ function ResetPasswordForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant/40"
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant"
               >
                 <span className="material-symbols-outlined">{showPassword ? "visibility" : "visibility_off"}</span>
               </button>

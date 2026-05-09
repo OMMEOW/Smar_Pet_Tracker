@@ -5,9 +5,9 @@ import { User } from "@/lib/models";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, phone } = await req.json();
 
-    if (!email || !password) {
+    if (!email || !password || !name || !phone) {
       return NextResponse.json(
         { message: "Missing email or password" },
         { status: 400 }
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     const newUser = await User.create({
       name,
       email,
+      phone,
       password: hashedPassword,
     });
 

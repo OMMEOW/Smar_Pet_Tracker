@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     await user.save();
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
-    
+
     // Configure NodeMailer transporter
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_SERVER_HOST,
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
           </div>
           <p style="color: #666; font-size: 12px;">If you did not request this, please ignore this email. Your account is still secure.</p>
           <hr style="border: none; border-top: 1px solid #eee; margin-top: 30px;" />
-          <p style="font-size: 10px; color: #999; text-align: center;">© 2024 Guardian Kinetic. Precision Tracking for the Modern Guardian.</p>
+          <p style="font-size: 10px; color: #999; text-align: center;">© 2026Guardian Kinetic. Precision Tracking for the Modern Guardian.</p>
         </div>
       `,
     });

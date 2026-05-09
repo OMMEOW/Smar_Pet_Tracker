@@ -11,14 +11,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
     const { searchParams } = new URL(request.url);
-    const petId = searchParams.get("petId") || "default_pet";
+    const petId = searchParams.get('petId');
+    const userId = (session.user as any).id;
 
     await dbConnect();
-    const history = await PetHistory.find({ userId, petId })
+    
+    const query: any = { userId };
+    if (petId) query.petId = petId;
+    
+    const history = await PetHistory.find(query)
       .sort({ timestamp: -1 })
       .limit(50);
+      
     return NextResponse.json(history);
   } catch (error) {
     console.error("API Error:", error);
@@ -36,7 +41,11 @@ export async function POST(request: Request) {
     const userId = (session.user as any).id;
     await dbConnect();
     const data = await request.json();
-    const petId = data.petId || "default_pet";
+    const petId = data.petId;
+    
+    if (!petId) {
+      return NextResponse.json({ error: "petId is required" }, { status: 400 });
+    }
     
     const entry = await PetHistory.create({
       userId,

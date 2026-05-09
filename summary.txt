@@ -1,0 +1,57 @@
+Guardian Kinetic: Project & UI Summary
+1. Project Overview
+Guardian Kinetic (formerly Smart Pet Tracker) is a premium, multi-device IoT SaaS platform designed for tracking and managing pets in real-time. The application was built to scale from a prototype into a production-grade web application, focusing on high reliability, robust state management, and a highly polished, accessible UI tailored explicitly for the Indian market.
+
+Core Technology Stack
+Framework: Next.js (App Router architecture)
+UI/Styling: React, Tailwind CSS, custom CSS tokens (Glassmorphism, Ambient Shadows)
+Database: MongoDB with Mongoose ODMs
+Authentication: NextAuth.js (Session-based, encrypted passwords)
+Mapping Engine: MapLibre GL JS (Replaced Leaflet for performance and precision)
+Animations/Skeletons: boneyard-js (Layout shift prevention)
+2. Architecture & Data Models
+The backend relies on strict Mongoose schemas mapping to individual collections, allowing seamless multi-device scaling without data crossover.
+
+User Model: Secures name, email, salted passwords, and Indian-formatted phone numbers (+91).
+Pet Status Model: Isolates each tracker via a unique petId. Maintains state for the tracker's battery percentage, online/offline polling timestamps (lastSeen), hardware configurations (species, breed), and precise LocationSchema coordinates.
+Geofence Schema: Embedded within the Pet Status. Captures the perimeter logic:
+circle: Uses a center coordinate array and a radial distance.
+lasso: Captures complex polygonal vertex arrays.
+History Model: Records an appending log of timestamps and coordinates filtered by petId to generate kinetic pathways.
+3. Core Features & Logic
+Multi-Pet Tracking Engine
+Users can register multiple pets via the dashboard. The application maps every pet simultaneously onto the MapLibre interface using independent markers. The user can switch "Active Focus" between pets, which instantly re-centers the map and updates the side-panel context metrics.
+
+Spatial Geofence Computations
+Geofences are computed natively on the client-side to instantly alert users:
+
+Haversine Distance: Checks if the live GPS coordinate exceeds the radius of a circular geofence.
+Ray-Casting Algorithm: Casts vectors from the live GPS point to determine if a dog has breached complex, user-drawn Lasso polygons.
+Connection & Hardware Emulation
+The frontend features failsafes for tracker hardware:
+
+If a tracker fails to update its timestamp within 15 minutes, the UI automatically strips its "Live Pulse" rings, applies a grayscale filter, and marks the status as Offline.
+4. UI/UX Design System
+The visual identity of Guardian Kinetic leans heavily into a "Premium SaaS" aesthetic, ditching flat or basic UI for a highly reactive, deep, and dynamic interface.
+
+The "Glass & Shadow" Aesthetic
+Surfaces: Heavy use of translucent glass-panel and glass-card CSS utilities utilizing -webkit-backdrop-filter: blur(20px).
+Depth: Replaced hard borders with .ambient-shadow and nested gradient overlays (bg-surface-container-lowest to highest) to create hierarchy.
+Color Theory: Relies on a primary vibrant kinetic green (.primary-gradient) juxtaposed against deep, high-contrast text (text-on-surface) to satisfy rigorous accessibility standards.
+Indian Localization & Form UX
+All forms enforce strict Indian formatting constraints to provide a native feel:
+
+Smart Phone Inputs: Inputs automatically sanitize non-digits, prefix with +91, and strictly enforce the 10-digit, 6-9 starting character rule.
+Indian Address Flows: The Profile UI uses standard Indian real estate hierarchies (House/Flat, Area/Locality, City, State, PIN Code). PIN Codes are strictly locked to 6 digits.
+Dropdown Intelligence: Pet additions default to native Indian categories (e.g., Indie / Desi Dog, Indian Billi).
+Currency & Time: All chronological data is parsed using the en-IN locale (DD/MM/YYYY) and financial/subscription markers utilize the ₹ symbol.
+Input Error States: Inline, non-intrusive red error borders and helper text explicitly flag validation failures before a network request is even attempted.
+5. Security & Session Handling
+Encryption: Passwords hashed using bcryptjs (12 rounds).
+Hardened Sessions: A custom useAutoLogout hook observes mouse/keyboard events. If 15 minutes of inactivity pass, the session is purged and the user is redirected to the login terminal to prevent unauthorized dashboard access.
+State Protections: Any page requiring user context forces unauthenticated users to a secure wall, mitigating dead-state rendering.
+6. Project Directory Overview
+/app/api: Houses the REST architecture for auth, pet management, and historical data retrieval.
+/app/(pages): Contains the route-based view controllers (Login, Dashboard, History, Settings).
+/components: The UI primitive layer housing the MapLibreMap, StatusCard, and GeofenceControls.
+/lib: Global constants, Mongoose configurations (mongodb.ts), Data Models (models.ts), and localization validation strings (validation.ts).

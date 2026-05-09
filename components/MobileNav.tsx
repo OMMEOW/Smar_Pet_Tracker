@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { memo } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -9,13 +10,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function MobileNav() {
+export const MobileNav = memo(function MobileNav() {
   const pathname = usePathname();
 
   const items = [
     { href: "/", icon: "dashboard", label: "Dashboard" },
     { href: "/pets", icon: "pets", label: "Pets" },
-    { href: "/profile", icon: "person", label: "Profile" },
+    { href: "/settings", icon: "settings", label: "Settings" },
   ];
 
   return (
@@ -38,4 +39,4 @@ export function MobileNav() {
       })}
     </nav>
   );
-}
+});

@@ -70,7 +70,7 @@ export async function PATCH(
     const updatedPet = await PetStatus.findOneAndUpdate(
       { userId, petId: id },
       { $set: body },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedPet) {

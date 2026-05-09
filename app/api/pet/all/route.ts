@@ -13,6 +13,8 @@ export async function GET(request: Request) {
 
     const userId = (session.user as any).id;
     await dbConnect();
+    
+    // Each pet has its own dedicated fence now, no need to fetch user defaults
     const pets = await PetStatus.find({ userId });
 
     return NextResponse.json(pets);

@@ -251,7 +251,7 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-t border-outline-variant/10 pt-8">
             <div className="text-secondary opacity-60 font-body text-sm tracking-wide">
-              © 2024 Guardian Kinetic. Precision Tracking for the Modern Guardian.
+              © 2026Guardian Kinetic. Precision Tracking for the Modern Guardian.
             </div>
             <div className="flex gap-6">
               <span className="material-symbols-outlined text-secondary opacity-60 cursor-pointer hover:text-primary transition-colors">social_leaderboard</span>

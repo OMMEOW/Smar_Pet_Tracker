@@ -1,214 +1,168 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef, memo } from "react";
 import dynamic from "next/dynamic";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNav } from "@/components/MobileNav";
 import { StatusCard } from "@/components/StatusCard";
+import { HeartRateCard } from "@/components/HeartRateCard";
 import { GeofenceControls } from "@/components/GeofenceControls";
 import { AlertsSection } from "@/components/AlertsSection";
 import { useSession, signOut } from "next-auth/react";
 import { Skeleton } from "boneyard-js/react";
+import { isPointInsideGeofence } from "@/lib/geofenceLogic";
+import useSWR, { mutate } from "swr";
 
 const MapLibreMap = dynamic(() => import("@/components/MapLibreMap"), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full bg-surface-container-low flex flex-col items-center justify-center gap-4">
       <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-      <div className="flex flex-col items-center">
-        <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] opacity-40">Kinetic Radar</span>
-        <p className="font-headline font-bold text-slate-400 text-xs">Initializing...</p>
-      </div>
+      <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] opacity-40">Kinetic Radar</span>
     </div>
   )
 });
 
-const MIN_GEOFENCE_RADIUS_METERS = 30;
-const MAX_GEOFENCE_RADIUS_METERS = 300;
-const DEFAULT_GEOFENCE_RADIUS_METERS = 100;
-
-interface Location {
-  latitude: number;
-  longitude: number;
-  timestamp: number;
-  satellites?: number;
-  hdop?: number;
-  distance?: number;
-  pulseBpm?: number;
-  pulseRaw?: number;
-}
-
-export type Geofence =
-  | { type: "circle"; lat: number; lng: number; radius: number }
-  | { type: "lasso"; coordinates: [number, number][] };
-
-function clampGeofenceRadius(radius: unknown) {
-  const value = Number(radius);
-  if (!Number.isFinite(value)) return DEFAULT_GEOFENCE_RADIUS_METERS;
-  return Math.min(Math.max(value, MIN_GEOFENCE_RADIUS_METERS), MAX_GEOFENCE_RADIUS_METERS);
-}
-
-function normalizeGeofence(geofence: any): Geofence {
-  if (geofence?.type === "lasso") return geofence;
-
-  return {
-    type: "circle",
-    lat: Number(geofence?.lat) || 0,
-    lng: Number(geofence?.lng) || 0,
-    radius: clampGeofenceRadius(geofence?.radius),
-  };
-}
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function DashboardView() {
   const { data: session, status: authStatus } = useSession();
-
-  const [pets, setPets] = useState<any[]>([]);
-  const [selectedPetId, setSelectedPetId] = useState("default_pet");
-  const [selectedPetName, setSelectedPetName] = useState("Apollo");
-  const [location, setLocation] = useState<Location | null>(null);
-  const [alert, setAlert] = useState(false);
-  const [geofence, setGeofence] = useState<Geofence | null>(null);
-  const [history, setHistory] = useState<any[]>([]);
-  const [mode, setMode] = useState<"circle" | "lasso">("circle");
+  const [activePetId, setActivePetId] = useState<string | null>(null);
   const [activeLassoPoints, setActiveLassoPoints] = useState<[number, number][]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const geofenceSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const localGeofenceEditUntil = useRef(0);
+  const [toast, setToast] = useState<{message: string, type: 'success'|'error'} | null>(null);
 
-  const liveCircleGeofence = geofence;
+  // 1. Fetch Static Pet Data (Once)
+  const { data: staticPets, error: staticError, isLoading: isStaticLoading } = useSWR(
+    authStatus === "authenticated" ? "/api/pets/static" : null,
+    fetcher,
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
 
-  useEffect(() => {
-    if (authStatus !== "authenticated") return;
-    const fetchPets = async () => {
-      try {
-        const res = await fetch("/api/pet/all");
-        if (res.status === 401) {
-          await signOut({ callbackUrl: "/?logout=true" });
-          return;
-        }
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setPets(data);
-          setSelectedPetId((current) =>
-            data.some((pet) => pet.petId === current) ? current : data[0].petId
-          );
-        }
-      } catch (err) {
-        console.error("Pets fetch error:", err);
-      }
-    };
+  // 2. Fetch Live Telemetry (Every 3 seconds)
+  const { data: liveTelemetry, mutate: mutateTelemetry } = useSWR(
+    authStatus === "authenticated" ? "/api/live-telemetry" : null,
+    fetcher,
+    { refreshInterval: 3000, dedupingInterval: 2000 }
+  );
 
-    fetchPets();
-  }, [authStatus]);
+  // 3. Fetch Live Alerts (Every 10 seconds)
+  const { data: liveAlerts } = useSWR(
+    authStatus === "authenticated" ? "/api/alerts/live" : null,
+    fetcher,
+    { refreshInterval: 10000 }
+  );
 
-  useEffect(() => {
-    if (authStatus !== "authenticated") return;
-    const petQuery = `petId=${encodeURIComponent(selectedPetId)}`;
-
-    const fetchStatus = async () => {
-      try {
-        const res = await fetch(`/api/pet?${petQuery}`);
-        if (res.status === 401) {
-          await signOut({ callbackUrl: "/?logout=true" });
-          return;
-        }
-        const data = await res.json();
-        if (data) {
-          setSelectedPetName(data.name || selectedPetId);
-          setLocation(data.location || null);
-          if (data.geofence && Date.now() > localGeofenceEditUntil.current) {
-            setGeofence(normalizeGeofence(data.geofence));
-          }
-          setAlert(data.alert || false);
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(`/api/pet/history?${petQuery}`);
-        const data = await res.json();
-        if (Array.isArray(data)) setHistory(data);
-      } catch (err) {
-        console.error("History fetch error:", err);
-      }
-    };
-
-    const fetchLiveData = () => {
-      fetchStatus();
-      fetchHistory();
-    };
-
-    fetchLiveData();
-    const interval = setInterval(fetchLiveData, 5000);
-    return () => clearInterval(interval);
-  }, [authStatus, selectedPetId]);
-
-  const normalizeLiveCircle = (newGeo: Geofence): Geofence => {
-    if (newGeo.type !== "circle") return newGeo;
-    return {
-      ...newGeo,
-      radius: clampGeofenceRadius(newGeo.radius),
-    };
+  const showToast = (message: string, type: 'success'|'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
-  const saveGeofence = async (nextGeofence: Geofence) => {
+  // Merge static and live data
+  const pets = useMemo(() => {
+    if (!staticPets) return [];
+    return staticPets.map((pet: any) => {
+      const telemetry = liveTelemetry?.find((t: any) => t.deviceId?.toLowerCase() === pet.deviceId?.toLowerCase());
+      
+      const updatedPet = {
+        ...pet,
+        location: telemetry ? {
+          latitude: Number(telemetry.latitude),
+          longitude: Number(telemetry.longitude),
+          timestamp: new Date(telemetry.timestamp).getTime()
+        } : pet.location,
+        pulseBpm: telemetry ? Number(telemetry.pulseBpm || 0) : (pet.pulseBpm || 0),
+        pulseRaw: telemetry ? Number(telemetry.pulseRaw || 0) : (pet.pulseRaw || 0),
+        isOnline: telemetry ? telemetry.online : false,
+        lastSeen: telemetry ? new Date(telemetry.timestamp) : pet.lastSeen
+      };
+
+      const isInside = updatedPet.location && pet.geofence?.coordinates?.length
+        ? isPointInsideGeofence(updatedPet.location.latitude, updatedPet.location.longitude, pet.geofence)
+        : true;
+
+      return {
+        ...updatedPet,
+        alert: !isInside
+      };
+    });
+  }, [staticPets, liveTelemetry]);
+
+  useEffect(() => {
+    if (pets.length > 0 && !activePetId) {
+      setActivePetId(pets[0].petId);
+    }
+  }, [pets, activePetId]);
+
+  const activePet = useMemo(() => pets.find(p => p.petId === activePetId) || null, [pets, activePetId]);
+  const globalBreach = useMemo(() => pets.find(p => p.alert === true), [pets]);
+
+  const handleUpdateGeofence = async (coords: [number, number][]) => {
+    if (!activePetId) return;
     try {
-      const res = await fetch("/api/pet", {
-        method: "POST",
+      const res = await fetch(`/api/pets/${activePetId}/geofence`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ petId: selectedPetId, geofence: nextGeofence }),
+        body: JSON.stringify({ coordinates: coords }),
       });
-      if (res.ok) setGeofence(nextGeofence);
+      if (res.ok) {
+        showToast("Geofence successfully updated.");
+        // Re-fetch static data to get new geofence
+        mutate("/api/pets/static");
+      } else {
+        showToast("Failed to update geofence.", "error");
+      }
     } catch (err) {
-      console.error("Update error:", err);
+      showToast("Connection error.", "error");
     }
   };
 
-  const handlePreviewGeofence = (newGeo: Geofence) => {
-    const nextGeofence = normalizeLiveCircle(newGeo);
-    localGeofenceEditUntil.current = Date.now() + 8000;
-    setGeofence(nextGeofence);
+  const formattedAlerts = useMemo(() => {
+    return (liveAlerts || []).map((a: any) => ({
+      message: a.message,
+      time: new Date(a.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: a.type === "GEOFENCE_BREACH" ? "danger" : "safe"
+    }));
+  }, [liveAlerts]);
 
-    if (geofenceSaveTimer.current) {
-      clearTimeout(geofenceSaveTimer.current);
-    }
+  const mapCenter = useMemo(() => {
+    return activePet?.location 
+      ? [activePet.location.latitude, activePet.location.longitude] 
+      : [19.076, 72.8777];
+  }, [activePetId]);
 
-    if (nextGeofence.type === "circle") {
-      geofenceSaveTimer.current = setTimeout(() => {
-        saveGeofence(nextGeofence).finally(() => {
-          localGeofenceEditUntil.current = Date.now() + 1000;
-        });
-      }, 700);
-    }
-  };
-
-  const handleUpdateGeofence = async (newGeo: Geofence) => {
-    const nextGeofence = normalizeLiveCircle(newGeo);
-    localGeofenceEditUntil.current = Date.now() + 8000;
-
-    if (geofenceSaveTimer.current) {
-      clearTimeout(geofenceSaveTimer.current);
-      geofenceSaveTimer.current = null;
-    }
-
-    await saveGeofence(nextGeofence);
-    localGeofenceEditUntil.current = Date.now() + 1000;
-  };
-
-  const formattedAlerts = history.slice(0, 5).map((h, i) => ({
-    message: i === 0 && alert ? "Dog left geofence" : "Location update received",
-    time: new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    type: (i === 0 && alert ? "danger" : "safe") as any
-  }));
+  if (authStatus === "loading" || isStaticLoading) {
+    return (
+      <div className="h-screen w-screen bg-surface flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div>
+        <p className="text-secondary font-headline font-bold">Initializing Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface">
+    <div className="flex flex-col min-h-screen bg-surface relative">
+      {globalBreach && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md animate-bounce">
+          <div className="bg-red-600 text-white px-6 py-4 rounded-[2rem] shadow-2xl flex items-center gap-4 border border-red-500/50 backdrop-blur-md bg-opacity-90">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
+              <span className="material-symbols-outlined text-2xl font-bold">warning</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-headline font-black text-xs uppercase tracking-wider">BREACH DETECTED: {globalBreach.name}</p>
+              <p className="text-[11px] font-bold opacity-90 leading-tight">Pet has left the designated safe zone.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold text-sm bg-primary text-white`}>
+          <span className="material-symbols-outlined text-[20px] text-white">{toast.type === 'success' ? 'check_circle' : 'error'}</span>
+          {toast.message}
+        </div>
+      )}
+
       <Navbar />
 
       <div className="flex flex-1">
@@ -216,102 +170,57 @@ export default function DashboardView() {
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-
-            {/* Map Section - Primary Focus */}
             <div className="lg:col-span-2 flex flex-col gap-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-black tracking-[0.16em] text-primary uppercase font-label">
-                    Connected Pet
-                  </p>
-                  <h1 className="font-headline text-2xl md:text-3xl font-extrabold tracking-tight text-on-surface capitalize">
-                    {selectedPetName}
-                  </h1>
-                </div>
-                <select
-                  value={selectedPetId}
-                  onChange={(event) => {
-                    setSelectedPetId(event.target.value);
-                    setIsLoading(true);
-                  }}
-                  className="w-full sm:w-64 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 font-headline font-bold text-sm text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  aria-label="Select connected pet"
-                >
-                  {pets.length === 0 ? (
-                    <option value="default_pet">Apollo</option>
-                  ) : (
-                    pets.map((pet) => (
-                      <option key={pet.petId} value={pet.petId}>
-                        {pet.name || pet.petId}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
+              {pets.length > 0 && (
+                 <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                   {pets.map(p => (
+                      <button 
+                        key={p.petId}
+                        onClick={() => setActivePetId(p.petId)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all border shrink-0 ${p.petId === activePetId ? 'bg-primary text-white border-primary shadow-md' : 'bg-surface-container-high text-secondary border-outline-variant/20 hover:bg-surface-container-highest'}`}
+                      >
+                         <img src={p.imageUrl || (p.species?.toLowerCase() === 'cat' ? '/cat.png' : '/dog.png')} className="w-6 h-6 rounded-full object-cover" alt={p.name} />
+                         <span className="font-bold text-sm">{p.name}</span>
+                         {p.alert && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+                      </button>
+                   ))}
+                 </div>
+              )}
 
-              <Skeleton name="map" loading={isLoading}>
-                <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-outline-variant/10 bg-surface-container-low relative">
-                  <MapLibreMap
-                    center={location ? [location.latitude, location.longitude] : [19.076, 72.8777]}
-                    markerPosition={location ? [location.latitude, location.longitude] : null}
-                    geofence={liveCircleGeofence}
-                    mode={mode}
-                    activeLassoPoints={activeLassoPoints}
-                    onLassoPointsChange={setActiveLassoPoints}
-                    onLassoFinish={(coords) => {
-                      setGeofence({ type: "lasso", coordinates: coords });
-                      setActiveLassoPoints([]);
-                    }}
-                  />
-                </div>
-              </Skeleton>
-
-              {/* Geofence Controls - Visible on Mobile/Tablet below map, hidden on LG because it's in the sidebar column */}
-              <div className="lg:hidden w-full">
-                <GeofenceControls
-                  mode={mode}
-                  onModeChange={(newMode) => {
-                    setMode(newMode);
-                    setActiveLassoPoints([]);
-                  }}
-                  initialGeofence={liveCircleGeofence}
-                  onPreview={handlePreviewGeofence}
-                  onUpdate={handleUpdateGeofence}
+              <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-outline-variant/10 bg-surface-container-low relative">
+                <MapLibreMap
+                  center={mapCenter as [number, number]}
+                  pets={pets}
+                  activePetId={activePetId}
+                  geofenceCoordinates={activePet?.geofence?.coordinates}
                   activeLassoPoints={activeLassoPoints}
                   onLassoPointsChange={setActiveLassoPoints}
+                  onLassoFinish={handleUpdateGeofence}
+                  onPetSelect={setActivePetId}
                 />
               </div>
             </div>
 
-            {/* Side Column - Status and Alerts */}
             <div className="flex flex-col gap-6 lg:gap-8">
-              <div className="w-full">
-                <Skeleton name="status-card" loading={isLoading}>
-                  <StatusCard location={location} alert={alert} petName={selectedPetName} />
-                </Skeleton>
-              </div>
+               {activePet && <StatusCard pet={activePet} />}
+               
+               {activePet && (
+                 <HeartRateCard 
+                   bpm={activePet.pulseBpm || 0} 
+                   lastUpdated={activePet.lastSeen} 
+                 />
+               )}
 
-              {/* Geofence Controls - Visible only on LG+ in this column */}
-              <div className="hidden lg:block w-full">
-                <GeofenceControls
-                  mode={mode}
-                  onModeChange={(newMode) => {
-                    setMode(newMode);
-                    setActiveLassoPoints([]);
-                  }}
-                  initialGeofence={liveCircleGeofence}
-                  onPreview={handlePreviewGeofence}
-                  onUpdate={handleUpdateGeofence}
-                  activeLassoPoints={activeLassoPoints}
-                  onLassoPointsChange={setActiveLassoPoints}
-                />
-              </div>
+               {activePet && (
+                 <GeofenceControls
+                   initialCoordinates={activePet.geofence?.coordinates || []}
+                   onUpdate={handleUpdateGeofence}
+                   activeLassoPoints={activeLassoPoints}
+                   onLassoPointsChange={setActiveLassoPoints}
+                 />
+               )}
 
-              <div className="w-full flex-1">
-                <Skeleton name="alerts" loading={isLoading}>
-                  <AlertsSection alerts={formattedAlerts} />
-                </Skeleton>
-              </div>
+               <AlertsSection alerts={formattedAlerts} />
             </div>
           </div>
         </main>

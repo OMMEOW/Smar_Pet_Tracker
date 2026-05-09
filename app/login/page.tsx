@@ -55,7 +55,7 @@ export default function LoginPage() {
               Security as an<br /><span className="text-primary italic">Art Form.</span>
             </h1>
             <p className="text-secondary text-lg leading-relaxed max-w-md font-body">
-              Access your guardian dashboard and monitor every movement with surgical precision and effortless clarity.
+
             </p>
           </div>
           <div className="flex items-center space-x-8">
@@ -101,7 +101,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-0 focus:border-primary transition-all font-medium outline-none"
+                  className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant focus:ring-0 focus:border-primary transition-all font-medium outline-none"
                   id="email"
                   name="email"
                   placeholder="name@agency.com"
@@ -110,7 +110,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-focus-within:text-primary transition-colors text-xl">
+                <span className="material-symbols-outlined absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors text-xl">
                   alternate_email
                 </span>
               </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
               </div>
               <div className="relative">
                 <input
-                  className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-0 focus:border-primary transition-all font-medium outline-none"
+                  className="w-full bg-transparent border-t-0 border-x-0 border-b-2 border-surface-container-highest px-0 py-3 text-on-surface placeholder:text-on-surface-variant focus:ring-0 focus:border-primary transition-all font-medium outline-none"
                   id="password"
                   name="password"
                   placeholder="••••••••"
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant/40 hover:text-primary transition-colors focus:outline-none"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
                 >
                   <span className="material-symbols-outlined text-xl">
                     {showPassword ? "visibility" : "visibility_off"}
@@ -192,7 +192,7 @@ export default function LoginPage() {
             <Link className="text-[10px] uppercase tracking-widest text-secondary font-semibold hover:text-primary transition-colors" href="#">Safety Standards</Link>
             <Link className="text-[10px] uppercase tracking-widest text-secondary font-semibold hover:text-primary transition-colors" href="#">Privacy</Link>
           </div>
-          <p className="text-[10px] text-on-secondary-container opacity-60">© 2024 Guardian Kinetic. Precision Tracking.</p>
+          <p className="text-[10px] text-on-secondary-container opacity-60">© 2026Guardian Kinetic. Precision Tracking.</p>
         </div>
       </footer>
     </div>

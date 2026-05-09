@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 interface Alert {
   message: string;
   time: string;
@@ -10,7 +12,7 @@ interface AlertsSectionProps {
   alerts?: Alert[];
 }
 
-export function AlertsSection({ alerts = [] }: AlertsSectionProps) {
+export const AlertsSection = memo(function AlertsSection({ alerts = [] }: AlertsSectionProps) {
   // Default alerts for visualization if none provided
   const displayAlerts = alerts.length > 0 ? alerts : [
     { message: "Inside geofence", time: "Just now", type: "safe" as const },
@@ -39,4 +41,4 @@ export function AlertsSection({ alerts = [] }: AlertsSectionProps) {
       </div>
     </div>
   );
-}
+});

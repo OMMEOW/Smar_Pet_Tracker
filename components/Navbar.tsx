@@ -5,14 +5,36 @@ import { usePathname } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useSession, signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
+import { useState, useEffect, memo } from "react";
+import { Sun, Moon } from "lucide-react";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function Navbar() {
+export const Navbar = memo(function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [activeAlertsCount, setActiveAlertsCount] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+    if (session?.user) {
+      const fetchAlerts = async () => {
+        try {
+          const res = await fetch("/api/alerts?status=ACTIVE");
+          const data = await res.json();
+          if (Array.isArray(data)) setActiveAlertsCount(data.length);
+        } catch (err) {}
+      };
+      fetchAlerts();
+      const interval = setInterval(fetchAlerts, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [session]);
 
   return (
     <header className="bg-[#f9f9fe]/80 dark:bg-[#1a1c1f]/80 backdrop-blur-xl font-headline font-semibold tracking-tight text-sm top-0 sticky z-50 no-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none w-full">
@@ -31,7 +53,7 @@ export function Navbar() {
                 pathname === "/" ? "text-primary dark:text-[#28cd41] font-bold" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
             >
-
+              Dashboard
             </Link>
             <Link
               href="/history"
@@ -40,7 +62,16 @@ export function Navbar() {
                 pathname === "/history" ? "text-primary dark:text-[#28cd41] font-bold" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
             >
-
+              History
+            </Link>
+            <Link
+              href="/alerts"
+              className={cn(
+                "transition-colors px-2 py-1 rounded-lg",
+                pathname === "/alerts" ? "text-primary dark:text-[#28cd41] font-bold" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              )}
+            >
+              Alerts
             </Link>
             <Link
               href="/settings"
@@ -49,7 +80,7 @@ export function Navbar() {
                 pathname === "/settings" ? "text-primary dark:text-[#28cd41] font-bold" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
             >
-
+              Settings
             </Link>
           </nav>
         </div>
@@ -60,9 +91,21 @@ export function Navbar() {
               <span className="text-slate-700 dark:text-slate-200 text-xs">{session.user.email}</span>
             </div>
           )}
-          <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full">
-            <span className="material-symbols-outlined">notifications</span>
+          <button 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full"
+          >
+            {mounted && (theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
           </button>
+          <Link 
+            href="/alerts"
+            className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors rounded-full relative"
+          >
+            <span className="material-symbols-outlined">notifications</span>
+            {activeAlertsCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-600 rounded-full border-2 border-white dark:border-[#1a1c1f]"></span>
+            )}
+          </Link>
           {session?.user ? (
             <button
               onClick={() => signOut({ callbackUrl: "/?logout=true" })}
@@ -80,4 +123,4 @@ export function Navbar() {
       </div>
     </header>
   );
-}
+});
